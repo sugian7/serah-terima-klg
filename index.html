@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serah Terima Kartu KLG</title>
+
+<style>
+body {
+  margin: 0;
+  padding: 16px;
+  font-family: system-ui, Arial, sans-serif;
+  background: #f3f4f6;
+  color: #111827;
+}
+h1 {
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+p {
+  margin-top: 0;
+  font-size: 14px;
+  color: #4b5563;
+}
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+button, input {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+}
+button.primary {
+  background: #1f4fd8;
+  color: #fff;
+  border-color: #1f4fd8;
+}
+button.success {
+  background: #1b7f3b;
+  color: #fff;
+  border-color: #1b7f3b;
+}
+.status {
+  margin-top: 12px;
+  font-weight: bold;
+}
+.ok { color: #1b7f3b; }
+.err { color: #b91c1c; }
+</style>
+</head>
+
+<body>
+
+<h1>Serah Terima Kartu KLG</h1>
+<p>Kelurahan – Tap kartu, foto warga, kirim</p>
+
+<div class="card">
+  <button class="primary" onclick="scanNFC()">📡 TAP NFC KARTU</button>
+
+  <div id="uidBox">UID: -</div>
+
+  <input type="file" accept="image/*" capture="environment" onchange="ambilFoto(this)">
+
+  <button class="success" onclick="kirim()">📤 KIRIM</button>
+
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+/* ================================
+   KONFIGURASI
+================================ */
+const API_URL = "https://script.google.com/macros/s/AKfycbzEPrz_ekB-Gm2uSshzlytVU4o0vAwNWfyH0hlzRiKMZw0-SrnEgPqjJLnI-AkSmAojFQ/exec";
+
+/* ================================
+   STATE
+================================ */
+let currentUID = "";
+let fotoBase64 = "";
+
+/* ================================
+   NFC
+================================ */
+async function scanNFC() {
+  const box = document.getElementById("uidBox");
+  box.innerText = "Menunggu kartu...";
+
+  if (!("NDEFReader" in window)) {
+    box.innerText = "❌ NFC tidak didukung";
+    return;
+  }
+
+  try {
+    const reader = new NDEFReader();
+    await reader.scan();
+
+    reader.onreading = e => {
+      currentUID = e.serialNumber || "";
+      box.innerText = currentUID
+        ? "UID: " + currentUID
+        : "❌ UID tidak terbaca";
+    };
+  } catch {
+    box.innerText = "❌ Gagal mengaktifkan NFC";
+  }
+}
+
+/* ================================
+   FOTO
+================================ */
+function ambilFoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    fotoBase64 = reader.result.split(",")[1];
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ================================
+   KIRIM
+================================ */
+function kirim() {
+  const status = document.getElementById("status");
+
+  if (!currentUID) {
+    status.innerHTML = '<span class="err">UID belum ada</span>';
+    return;
+  }
+  if (!fotoBase64) {
+    status.innerHTML = '<span class="err">Foto belum diambil</span>';
+    return;
+  }
+
+  status.innerText = "Mengirim...";
+
+  fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body:
+      "action=serah_terima" +
+      "&uid=" + encodeURIComponent(currentUID) +
+      "&foto=" + encodeURIComponent(fotoBase64)
+  })
+  .then(r => r.json())
+  .then(res => {
+    status.innerHTML = res.ok
+      ? '<span class="ok">' + res.msg + '</span>'
+      : '<span class="err">' + res.msg + '</span>';
+
+    if (res.ok) {
+      currentUID = "";
+      fotoBase64 = "";
+      document.getElementById("uidBox").innerText = "UID: -";
+    }
+  })
+  .catch(() => {
+    status.innerHTML = '<span class="err">Gagal menghubungi server</span>';
+  });
+}
+</script>
+
+</body>
+</html>
