@@ -69,6 +69,10 @@ button.secondary {
   color: var(--text);
 }
 
+button:disabled {
+  opacity: 0.6;
+}
+
 .uid-box {
   margin-top: 10px;
   padding: 10px;
@@ -112,12 +116,10 @@ canvas { display: none; }
 
   <div class="uid-box" id="uidBox">UID belum terbaca</div>
 
-  <!-- Kamera -->
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas"></canvas>
 
-  <!-- Preview Foto -->
-  <img id="previewFoto" alt="Preview foto">
+  <img id="previewFoto" alt="Preview Foto">
 
   <button id="ambilFotoBtn" onclick="ambilFoto()" style="display:none;">
     Ambil Foto
@@ -171,7 +173,7 @@ async function scanNFC() {
       currentUID = e.serialNumber || "";
       if (currentUID) {
         uidBox.textContent = "UID: " + currentUID;
-        bukaKamera(); // AUTO BUKA KAMERA
+        bukaKamera();
       } else {
         uidBox.textContent = "UID tidak terbaca";
       }
@@ -182,7 +184,7 @@ async function scanNFC() {
 }
 
 /* ================================
-   KAMERA (TIDAK SIMPAN KE HP)
+   KAMERA
 ================================ */
 async function bukaKamera() {
   const video = document.getElementById("video");
@@ -211,11 +213,9 @@ function ambilFoto() {
   fotoBase64 = canvas.toDataURL("image/jpeg", 0.85);
   preview.src = fotoBase64;
 
-  // Hentikan kamera
   stream.getTracks().forEach(t => t.stop());
   video.style.display = "none";
 
-  // Tampilkan preview & tombol
   preview.style.display = "block";
   document.getElementById("ambilFotoBtn").style.display = "none";
   document.getElementById("ulangFotoBtn").style.display = "block";
@@ -235,12 +235,14 @@ function ulangFoto() {
 ================================ */
 function kirim() {
   const status = document.getElementById("status");
+  const btn = document.getElementById("kirimBtn");
 
   if (!currentUID || !fotoBase64) {
     status.innerHTML = '<span class="err">UID atau foto belum tersedia</span>';
     return;
   }
 
+  btn.disabled = true;
   status.textContent = "Mengirim data...";
 
   fetch(API_URL, {
@@ -251,18 +253,32 @@ function kirim() {
       "&uid=" + encodeURIComponent(currentUID) +
       "&foto=" + encodeURIComponent(fotoBase64.split(",")[1])
   })
-  .then(r => r.json())
-  .then(res => {
-    status.innerHTML = res.ok
-      ? '<span class="ok">' + res.msg + '</span>'
-      : '<span class="err">' + res.msg + '</span>';
+  .then(r => r.text())
+  .then(txt => {
+    console.log("RAW RESPONSE:", txt);
 
-    if (res.ok) {
-      resetAll();
+    let res;
+    try {
+      res = JSON.parse(txt);
+    } catch {
+      status.innerHTML = '<span class="err">BACKEND ERROR</span>';
+      btn.disabled = false;
+      return;
     }
+
+    if (!res.ok) {
+      status.innerHTML =
+        '<span class="err">' + (res.msg || 'GAGAL SERAH TERIMA') + '</span>';
+      btn.disabled = false;
+      return;
+    }
+
+    status.innerHTML = '<span class="ok">' + res.msg + '</span>';
+    resetAll();
   })
-  .catch(() => {
-    status.innerHTML = '<span class="err">Gagal menghubungi server</span>';
+  .catch(err => {
+    status.innerHTML = '<span class="err">FETCH ERROR</span>';
+    btn.disabled = false;
   });
 }
 
