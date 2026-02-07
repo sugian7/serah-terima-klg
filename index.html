@@ -64,6 +64,11 @@ button.success {
   color: #fff;
 }
 
+button.secondary {
+  background: #fff;
+  color: var(--text);
+}
+
 .uid-box {
   margin-top: 10px;
   padding: 10px;
@@ -82,12 +87,14 @@ button.success {
 .ok { color: var(--success); }
 .err { color: var(--error); }
 
-video {
+video, img {
   width: 100%;
   border-radius: 10px;
   margin-top: 10px;
-  display: none;
 }
+
+video { display: none; }
+img { display: none; }
 
 canvas { display: none; }
 </style>
@@ -103,18 +110,24 @@ canvas { display: none; }
 <div class="card">
   <button class="primary" onclick="scanNFC()">Aktifkan Pembacaan Kartu</button>
 
-  <div class="uid-box" id="uidBox">
-    UID belum terbaca
-  </div>
+  <div class="uid-box" id="uidBox">UID belum terbaca</div>
 
+  <!-- Kamera -->
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas"></canvas>
+
+  <!-- Preview Foto -->
+  <img id="previewFoto" alt="Preview foto">
 
   <button id="ambilFotoBtn" onclick="ambilFoto()" style="display:none;">
     Ambil Foto
   </button>
 
-  <button class="success" id="kirimBtn" onclick="kirim()" style="display:none;">
+  <button id="ulangFotoBtn" class="secondary" onclick="ulangFoto()" style="display:none;">
+    Ulangi Foto
+  </button>
+
+  <button id="kirimBtn" class="success" onclick="kirim()" style="display:none;">
     Konfirmasi Serah Terima
   </button>
 
@@ -123,7 +136,7 @@ canvas { display: none; }
 
 <script>
 /* ================================
-   KONFIGURASI API (JANGAN DIUBAH)
+   KONFIGURASI API
 ================================ */
 const API_URL =
   "https://script.google.com/macros/s/AKfycbzEPrz_ekB-Gm2uSshzlytVU4o0vAwNWfyH0hlzRiKMZw0-SrnEgPqjJLnI-AkSmAojFQ/exec";
@@ -136,7 +149,7 @@ let fotoBase64 = "";
 let stream = null;
 
 /* ================================
-   NFC SCAN
+   NFC
 ================================ */
 async function scanNFC() {
   const uidBox = document.getElementById("uidBox");
@@ -187,7 +200,7 @@ async function bukaKamera() {
 function ambilFoto() {
   const video = document.getElementById("video");
   const canvas = document.getElementById("canvas");
-  const kirimBtn = document.getElementById("kirimBtn");
+  const preview = document.getElementById("previewFoto");
 
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
@@ -195,13 +208,26 @@ function ambilFoto() {
   const ctx = canvas.getContext("2d");
   ctx.drawImage(video, 0, 0);
 
-  fotoBase64 = canvas.toDataURL("image/jpeg", 0.85).split(",")[1];
+  fotoBase64 = canvas.toDataURL("image/jpeg", 0.85);
+  preview.src = fotoBase64;
 
-  kirimBtn.style.display = "block";
-
-  // Matikan kamera setelah foto diambil
+  // Hentikan kamera
   stream.getTracks().forEach(t => t.stop());
   video.style.display = "none";
+
+  // Tampilkan preview & tombol
+  preview.style.display = "block";
+  document.getElementById("ambilFotoBtn").style.display = "none";
+  document.getElementById("ulangFotoBtn").style.display = "block";
+  document.getElementById("kirimBtn").style.display = "block";
+}
+
+function ulangFoto() {
+  fotoBase64 = "";
+  document.getElementById("previewFoto").style.display = "none";
+  document.getElementById("ulangFotoBtn").style.display = "none";
+  document.getElementById("kirimBtn").style.display = "none";
+  bukaKamera();
 }
 
 /* ================================
@@ -223,7 +249,7 @@ function kirim() {
     body:
       "action=serah_terima" +
       "&uid=" + encodeURIComponent(currentUID) +
-      "&foto=" + encodeURIComponent(fotoBase64)
+      "&foto=" + encodeURIComponent(fotoBase64.split(",")[1])
   })
   .then(r => r.json())
   .then(res => {
@@ -232,16 +258,21 @@ function kirim() {
       : '<span class="err">' + res.msg + '</span>';
 
     if (res.ok) {
-      currentUID = "";
-      fotoBase64 = "";
-      document.getElementById("ambilFotoBtn").style.display = "none";
-      document.getElementById("kirimBtn").style.display = "none";
-      document.getElementById("uidBox").textContent = "UID belum terbaca";
+      resetAll();
     }
   })
   .catch(() => {
     status.innerHTML = '<span class="err">Gagal menghubungi server</span>';
   });
+}
+
+function resetAll() {
+  currentUID = "";
+  fotoBase64 = "";
+  document.getElementById("uidBox").textContent = "UID belum terbaca";
+  document.getElementById("previewFoto").style.display = "none";
+  document.getElementById("ulangFotoBtn").style.display = "none";
+  document.getElementById("kirimBtn").style.display = "none";
 }
 </script>
 
