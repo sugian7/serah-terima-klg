@@ -7,275 +7,238 @@
 <title>Serah Terima Kartu Layanan Gratis</title>
 
 <style>
-:root {
-  --primary: #1f3a8a;
-  --success: #166534;
-  --danger: #991b1b;
-  --bg: #f1f5f9;
-  --card: #ffffff;
-  --text: #0f172a;
-  --muted: #475569;
-  --border: #cbd5e1;
+:root{
+  --primary:#1e3a8a;
+  --success:#15803d;
+  --danger:#b91c1c;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
 }
 
-* { box-sizing: border-box; }
+*{box-sizing:border-box}
 
-body {
-  margin: 0;
-  padding: 16px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-}
-
-.header h1 {
-  font-size: 18px;
-  margin: 0;
-}
-.header p {
-  margin: 4px 0 12px;
-  font-size: 13px;
-  color: var(--muted);
+body{
+  margin:0;
+  background:var(--bg);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--text);
 }
 
-.card {
-  background: var(--card);
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.08);
-  margin-bottom: 14px;
+.container{
+  max-width:480px;
+  margin:0 auto;
+  padding:16px;
 }
 
-label {
-  font-size: 13px;
-  color: var(--muted);
+.header h1{
+  font-size:18px;
+  margin:0;
+}
+.header p{
+  font-size:13px;
+  color:var(--muted);
+  margin:4px 0 12px;
 }
 
-input {
-  width: 100%;
-  padding: 14px;
-  font-size: 18px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  margin-top: 6px;
+.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);
+  margin-bottom:16px;
 }
 
-input:focus {
-  outline: none;
-  border-color: var(--primary);
+label{
+  font-size:13px;
+  color:var(--muted);
 }
 
-button {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  border-radius: 10px;
-  border: none;
-  margin-top: 12px;
+input{
+  width:100%;
+  margin-top:6px;
+  padding:14px;
+  font-size:18px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  text-align:center;
 }
 
-button.primary {
-  background: var(--primary);
-  color: #fff;
+button{
+  width:100%;
+  padding:14px;
+  font-size:16px;
+  border-radius:12px;
+  border:none;
+  margin-top:14px;
 }
 
-button.success {
-  background: var(--success);
-  color: #fff;
+.primary{background:var(--primary);color:#fff}
+.success{background:var(--success);color:#fff}
+.secondary{
+  background:#fff;
+  border:1px solid var(--border);
 }
 
-button.secondary {
-  background: #fff;
-  color: var(--text);
-  border: 1px solid var(--border);
+.data-row{
+  display:flex;
+  padding:8px 0;
+  border-bottom:1px solid var(--border);
+}
+.data-row:last-child{border-bottom:none}
+.data-key{width:120px;font-size:13px;color:var(--muted)}
+.data-val{flex:1;font-size:14px;font-weight:600}
+
+/* KAMERA */
+.camera-box{
+  position:relative;
+  width:100%;
+  aspect-ratio:4/3;
+  background:#000;
+  border-radius:12px;
+  overflow:hidden;
+  margin-top:12px;
+  display:none;
+}
+.camera-box video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
-button:disabled {
-  opacity: .6;
+img{
+  width:100%;
+  border-radius:12px;
+  margin-top:12px;
+  display:none;
 }
 
-.row {
-  display: flex;
-  margin-bottom: 6px;
+.status{
+  text-align:center;
+  font-size:14px;
+  font-weight:600;
 }
-.key {
-  width: 140px;
-  font-size: 13px;
-  color: var(--muted);
-}
-.val {
-  flex: 1;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-video, img {
-  width: 100%;
-  border-radius: 10px;
-  margin-top: 10px;
-}
-
-video { display: none; }
-img { display: none; }
-canvas { display: none; }
-
-.status {
-  margin-top: 12px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.ok { color: var(--success); }
-.err { color: var(--danger); }
+.ok{color:var(--success)}
+.err{color:var(--danger)}
 </style>
 </head>
 
 <body>
 
+<div class="container">
+
 <div class="header">
   <h1>Serah Terima Kartu Layanan Gratis</h1>
-  <p>Kelurahan – Konfirmasi penerimaan kartu oleh warga</p>
+  <p>Kelurahan – Konfirmasi penerimaan kartu</p>
 </div>
 
 <!-- INPUT -->
 <div class="card">
   <label>Nomor Layanan</label>
-  <input id="nomor"
-         inputmode="numeric"
-         pattern="[0-9]*"
-         placeholder="Masukkan nomor layanan"
-         oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-
+  <input id="nomor" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="Masukkan nomor layanan">
   <button class="primary" onclick="cari()">Cari Data</button>
 </div>
 
 <!-- DATA -->
-<div class="card" id="dataCard" style="display:none;">
-  <div class="row"><div class="key">Nomor Layanan</div><div class="val" id="dNomor"></div></div>
-  <div class="row"><div class="key">Kategori</div><div class="val" id="dKategori"></div></div>
-  <div class="row"><div class="key">NIK</div><div class="val" id="dNik"></div></div>
-  <div class="row"><div class="key">Nama</div><div class="val" id="dNama"></div></div>
-  <div class="row"><div class="key">Kelurahan</div><div class="val" id="dKel"></div></div>
-  <div class="row"><div class="key">Kecamatan</div><div class="val" id="dKec"></div></div>
-  <div class="row"><div class="key">Kota</div><div class="val" id="dKota"></div></div>
-  <div class="row"><div class="key">Provinsi</div><div class="val" id="dProv"></div></div>
+<div class="card" id="dataCard" style="display:none">
+  <div class="data-row"><div class="data-key">Nomor</div><div class="data-val" id="dNomor"></div></div>
+  <div class="data-row"><div class="data-key">Kategori</div><div class="data-val" id="dKategori"></div></div>
+  <div class="data-row"><div class="data-key">NIK</div><div class="data-val" id="dNik"></div></div>
+  <div class="data-row"><div class="data-key">Nama</div><div class="data-val" id="dNama"></div></div>
+  <div class="data-row"><div class="data-key">Kelurahan</div><div class="data-val" id="dKel"></div></div>
+  <div class="data-row"><div class="data-key">Kecamatan</div><div class="data-val" id="dKec"></div></div>
+  <div class="data-row"><div class="data-key">Kota</div><div class="data-val" id="dKota"></div></div>
+  <div class="data-row"><div class="data-key">Provinsi</div><div class="data-val" id="dProv"></div></div>
 
-  <button class="secondary" onclick="bukaKamera()">Ambil Foto</button>
+  <button class="secondary" onclick="openCamera()">Ambil Foto Bukti</button>
 
-  <video id="video" autoplay playsinline></video>
-  <canvas id="canvas"></canvas>
+  <div class="camera-box" id="cameraBox">
+    <video id="video" autoplay playsinline></video>
+  </div>
+
   <img id="preview">
 
-  <button id="ulangBtn" class="secondary" onclick="ulang()" style="display:none;">Ulangi Foto</button>
-  <button id="kirimBtn" class="success" onclick="kirim()" style="display:none;">Kirim Serah Terima</button>
+  <button id="shotBtn" class="secondary" onclick="takePhoto()" style="display:none">Ambil Gambar</button>
+  <button id="sendBtn" class="success" onclick="kirim()" style="display:none">Konfirmasi Serah Terima</button>
 </div>
 
 <div class="status" id="status"></div>
 
+</div>
+
 <script>
-/* ================= CONFIG ================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbwr80zl2RUdDzj1iuLicdKbXCE2JVWOSoqN4YEchhwOMHzGjnS77LQrzRUDK-SEth7TeQ/exec";
+const API_URL = "GANTI_DENGAN_URL_WEB_APP_KAMU";
 
-/* ================= STATE ================= */
-let currentNomor = "";
-let fotoBase64 = "";
-let stream = null;
+let currentNomor="", fotoBase64="", stream=null;
 
-/* ================= CARI DATA ================= */
-function cari() {
-  const nomor = document.getElementById("nomor").value.trim();
-  const status = document.getElementById("status");
-  status.textContent = "";
-
-  if (!nomor) {
-    status.innerHTML = '<span class="err">Nomor layanan belum diisi</span>';
-    return;
-  }
-
-  fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: "action=cari&nomor=" + encodeURIComponent(nomor)
+function cari(){
+  const nomor=nomorInput();
+  fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:"action=cari&nomor="+encodeURIComponent(nomor)
   })
-  .then(r => r.json())
-  .then(res => {
-    if (!res.ok) {
-      status.innerHTML = '<span class="err">' + res.msg + '</span>';
-      return;
-    }
-
-    currentNomor = nomor;
-    document.getElementById("dataCard").style.display = "block";
-
-    dNomor.textContent = res.nomor_layanan;
-    dKategori.textContent = res.kategori;
-    dNik.textContent = res.nik;
-    dNama.textContent = res.nama;
-    dKel.textContent = res.kelurahan;
-    dKec.textContent = res.kecamatan;
-    dKota.textContent = res.kota;
-    dProv.textContent = res.provinsi;
-  })
-  .catch(() => status.innerHTML = '<span class="err">Gagal menghubungi server</span>');
-}
-
-/* ================= KAMERA ================= */
-async function bukaKamera() {
-  const video = document.getElementById("video");
-  stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-  video.srcObject = stream;
-  video.style.display = "block";
-}
-
-function ulang() {
-  fotoBase64 = "";
-  document.getElementById("preview").style.display = "none";
-  document.getElementById("ulangBtn").style.display = "none";
-  document.getElementById("kirimBtn").style.display = "none";
-  bukaKamera();
-}
-
-function kirim() {
-  const status = document.getElementById("status");
-  const btn = document.getElementById("kirimBtn");
-  btn.disabled = true;
-
-  fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body:
-      "action=serah_terima" +
-      "&nomor=" + encodeURIComponent(currentNomor) +
-      "&foto=" + encodeURIComponent(fotoBase64.split(",")[1])
-  })
-  .then(r => r.json())
-  .then(res => {
-    if (!res.ok) {
-      status.innerHTML = '<span class="err">' + res.msg + '</span>';
-      btn.disabled = false;
-      return;
-    }
-    status.innerHTML = '<span class="ok">Serah terima berhasil</span>';
-    location.reload();
+  .then(r=>r.json())
+  .then(res=>{
+    if(!res.ok){showErr(res.msg);return;}
+    currentNomor=nomor;
+    dataCard.style.display="block";
+    dNomor.textContent=res.nomor_layanan;
+    dKategori.textContent=res.kategori;
+    dNik.textContent=res.nik;
+    dNama.textContent=res.nama;
+    dKel.textContent=res.kelurahan;
+    dKec.textContent=res.kecamatan;
+    dKota.textContent=res.kota;
+    dProv.textContent=res.provinsi;
   });
 }
 
-/* Ambil foto */
-document.getElementById("video").addEventListener("click", () => {
-  const v = video;
-  const c = canvas;
-  c.width = v.videoWidth;
-  c.height = v.videoHeight;
-  c.getContext("2d").drawImage(v, 0, 0);
-  fotoBase64 = c.toDataURL("image/jpeg", 0.85);
-  preview.src = fotoBase64;
+function openCamera(){
+  cameraBox.style.display="block";
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}})
+    .then(s=>{
+      stream=s;
+      video.srcObject=s;
+      shotBtn.style.display="block";
+    });
+}
 
-  stream.getTracks().forEach(t => t.stop());
-  video.style.display = "none";
-  preview.style.display = "block";
-  ulangBtn.style.display = "block";
-  kirimBtn.style.display = "block";
-});
+function takePhoto(){
+  const c=document.createElement("canvas");
+  c.width=video.videoWidth;
+  c.height=video.videoHeight;
+  c.getContext("2d").drawImage(video,0,0);
+  fotoBase64=c.toDataURL("image/jpeg",0.85);
+  preview.src=fotoBase64;
+  preview.style.display="block";
+
+  stream.getTracks().forEach(t=>t.stop());
+  cameraBox.style.display="none";
+  shotBtn.style.display="none";
+  sendBtn.style.display="block";
+}
+
+function kirim(){
+  sendBtn.disabled=true;
+  fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:"action=serah_terima&nomor="+encodeURIComponent(currentNomor)+"&foto="+encodeURIComponent(fotoBase64.split(",")[1])
+  })
+  .then(r=>r.json())
+  .then(res=>{
+    if(!res.ok){showErr(res.msg);sendBtn.disabled=false;return;}
+    showOk("Serah terima berhasil");
+    setTimeout(()=>location.reload(),1200);
+  });
+}
+
+function nomorInput(){return document.getElementById("nomor").value.trim();}
+function showErr(m){status.innerHTML='<span class="err">'+m+'</span>';}
+function showOk(m){status.innerHTML='<span class="ok">'+m+'</span>';}
 </script>
 
 </body>
