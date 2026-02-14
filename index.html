@@ -13,38 +13,144 @@
   --bg:#f4f6f8;
   --card:#ffffff;
   --border:#e2e8f0;
-  --muted:#64748b;
+  --label:#64748b;
+  --text:#0f172a;
 }
 *{box-sizing:border-box}
 body{
-  margin:0;background:var(--bg);
+  margin:0;
+  background:var(--bg);
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--text);
 }
-.container{max-width:480px;margin:0 auto;padding:16px}
-.card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px;}
-label{font-size:13px;color:var(--muted)}
-input{width:100%;padding:14px;margin-top:6px;font-size:18px;border-radius:12px;border:1px solid var(--border);text-align:center;}
-button{width:100%;padding:14px;font-size:16px;border-radius:12px;border:none;margin-top:14px;cursor:pointer;}
+.container{
+  max-width:480px;
+  margin:0 auto;
+  padding:16px;
+}
+.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);
+  margin-bottom:16px;
+}
+label{
+  font-size:13px;
+  color:var(--label);
+}
+input{
+  width:100%;
+  padding:14px;
+  margin-top:6px;
+  font-size:18px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  text-align:center;
+}
+button{
+  width:100%;
+  padding:14px;
+  font-size:16px;
+  border-radius:12px;
+  border:none;
+  margin-top:14px;
+}
 .primary{background:var(--primary);color:#fff}
 .secondary{background:#fff;border:1px solid var(--border)}
 .success{background:var(--success);color:#fff}
 .err{color:var(--danger);font-weight:600;text-align:center}
-.status{text-align:center;font-weight:600}
+.status{text-align:center;font-size:14px;font-weight:600}
+
+/* DATA ROW */
+.data-row{
+  display:grid;
+  grid-template-columns:110px 1fr;
+  gap:8px;
+  padding:8px 0;
+  border-bottom:1px solid var(--border);
+}
+.data-row:last-child{border-bottom:none}
+.data-key{
+  font-size:12px;
+  color:var(--label);
+}
+.data-val{
+  font-size:14px;
+  font-weight:600;
+  word-break:break-word;
+}
+
+/* FOTO */
+#preview{
+  width:100%;
+  max-height:320px;
+  object-fit:contain;
+  border-radius:12px;
+  margin-top:12px;
+  display:none;
+  background:#000;
+}
 
 /* LOADING */
-.loading{display:inline-flex;gap:8px;align-items:center;justify-content:center}
-.spinner{width:18px;height:18px;border:3px solid #c7d2fe;border-top-color:#1e3a8a;border-radius:50%;animation:spin 1s linear infinite;}
+.loading{
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  justify-content:center;
+}
+.spinner{
+  width:18px;
+  height:18px;
+  border:3px solid #c7d2fe;
+  border-top-color:#1e3a8a;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* MODAL KAMERA */
-.modal{position:fixed;inset:0;background:#000;display:none;z-index:9999;}
-.modal video{width:100%;height:100%;object-fit:cover}
-.modal-actions{position:absolute;bottom:0;left:0;right:0;display:flex;gap:12px;padding:12px;background:rgba(0,0,0,.7)}
+/* MODAL CAMERA */
+.modal{
+  position:fixed;
+  inset:0;
+  background:#000;
+  display:none;
+  z-index:9999;
+}
+.modal video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.modal-actions{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  gap:12px;
+  padding:12px;
+  background:rgba(0,0,0,.7);
+}
 .modal-actions button{flex:1}
 
 /* POPUP */
-.popup{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:9999;}
-.popup-box{background:#fff;padding:20px;border-radius:16px;text-align:center;max-width:320px;}
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.popup-box{
+  background:#fff;
+  padding:20px;
+  border-radius:16px;
+  text-align:center;
+  max-width:320px;
+}
 </style>
 </head>
 
@@ -52,7 +158,7 @@ button{width:100%;padding:14px;font-size:16px;border-radius:12px;border:none;mar
 
 <div class="container">
 
-  <!-- input & cari -->
+  <!-- CARI -->
   <div class="card" id="searchCard">
     <label>Nomor Layanan</label>
     <input id="nomor" inputmode="numeric"
@@ -61,9 +167,8 @@ button{width:100%;padding:14px;font-size:16px;border-radius:12px;border:none;mar
     <button class="primary" id="searchBtn" onclick="cari()">Cari Data</button>
   </div>
 
-  <!-- data dan aksi -->
+  <!-- DATA -->
   <div class="card" id="dataCard" style="display:none">
-
     <div class="data-row"><div class="data-key">Nomor</div><div class="data-val" id="dNomor"></div></div>
     <div class="data-row"><div class="data-key">Kategori</div><div class="data-val" id="dKategori"></div></div>
     <div class="data-row"><div class="data-key">NIK</div><div class="data-val" id="dNik"></div></div>
@@ -74,18 +179,16 @@ button{width:100%;padding:14px;font-size:16px;border-radius:12px;border:none;mar
     <div class="data-row"><div class="data-key">Provinsi</div><div class="data-val" id="dProv"></div></div>
 
     <button class="secondary" id="photoBtn" onclick="openCamera()">Ambil Foto Bukti</button>
-
     <img id="preview">
     <button id="sendBtn" class="success" onclick="kirim()" style="display:none">
-      Konfirmasi Serah Terima
+      Konfirmasi
     </button>
-
   </div>
 
   <div class="status" id="status"></div>
 </div>
 
-<!-- modal kamera -->
+<!-- CAMERA -->
 <div class="modal" id="cameraModal">
   <video id="video" autoplay playsinline></video>
   <div class="modal-actions">
@@ -94,33 +197,29 @@ button{width:100%;padding:14px;font-size:16px;border-radius:12px;border:none;mar
   </div>
 </div>
 
-<!-- popup sukses -->
+<!-- POPUP -->
 <div class="popup" id="successPopup">
   <div class="popup-box">
     <h3>Berhasil</h3>
-    <p>Data telah disimpan.</p>
+    <p>Data telah diperbarui.</p>
     <button class="success" onclick="location.reload()">OK</button>
   </div>
 </div>
 
-<!-- popup sudah diterima -->
-<div class="popup" id="errorPopup">
-  <div class="popup-box">
-    <h3 style="color:#b91c1c">Tidak Dapat Diproses</h3>
-    <p>Nomor layanan ini sudah pernah diserahterimakan.</p>
-    <button class="primary" onclick="location.reload()">OK</button>
-  </div>
-</div>
-
 <script>
-const API_URL   = "https://script.google.com/macros/s/AKfycbyX8gr4rVAOBpgdBMO1_G2jzsB_TdMTjfxDLSsb53OjAMp97Kb8kjrWMP0Hv5WNs0kz6Q/exec"; 
+/* KONFIGURASI */
+const API_URL = "https://script.google.com/macros/s/AKfycbwY9OSH6GH1zPwJkKKH9vsxU_Jx_jZ2cBIMSQSCb-Ms1LGNAbU08I1JVTAaVd9IM6B7vA/exec";
 const SECRET_KEY = "yhggt5540YhGGtxthpBGTSugiantech";
 
 let currentNomor="", fotoBase64="", stream=null, submitting=false;
 
+/* CARI DATA */
 function cari(){
-  const val=nomor.value.trim();
-  if(!val){status.innerHTML='<span class="err">Nomor layanan kosong</span>';return;}
+  const val = nomor.value.trim();
+  if(!val){
+    status.innerHTML='<span class="err">Nomor layanan belum diisi</span>';
+    return;
+  }
 
   searchBtn.disabled=true;
   nomor.disabled=true;
@@ -142,15 +241,11 @@ function cari(){
     searchBtn.innerHTML="Cari Data";
 
     if(!res.ok){
-      if(String(res.msg).toLowerCase().includes("sudah")){
-        errorPopup.style.display="flex";
-        return;
-      }
       status.innerHTML='<span class="err">'+res.msg+'</span>';
       return;
     }
 
-    currentNomor=val;
+    currentNomor = val;
     dataCard.style.display="block";
 
     dNomor.textContent=res.nomor_layanan;
@@ -164,17 +259,18 @@ function cari(){
   });
 }
 
+/* CAMERA */
 async function openCamera(){
   cameraModal.style.display="block";
-  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
-  video.srcObject=stream;
+  stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+  video.srcObject = stream;
 }
-
 function closeCamera(){
-  if(stream)stream.getTracks().forEach(t=>t.stop());
+  if(stream) stream.getTracks().forEach(t=>t.stop());
   cameraModal.style.display="none";
 }
 
+/* FOTO */
 function takePhoto(){
   const c=document.createElement("canvas");
   c.width=video.videoWidth;
@@ -191,7 +287,8 @@ function takePhoto(){
   ctx.fillText(stamp,10,c.height-15);
 
   fotoBase64=c.toDataURL("image/jpeg",0.85);
-  preview.src=fotoBase64;preview.style.display="block";
+  preview.src=fotoBase64;
+  preview.style.display="block";
 
   closeCamera();
   searchCard.style.display="none";
@@ -199,9 +296,11 @@ function takePhoto(){
   sendBtn.style.display="block";
 }
 
+/* KIRIM */
 function kirim(){
-  if(submitting)return;
+  if(submitting) return;
   submitting=true;
+
   sendBtn.disabled=true;
   sendBtn.innerHTML=`<span class="loading"><span class="spinner"></span>Mengirim data...</span>`;
 
@@ -217,9 +316,11 @@ function kirim(){
   .then(r=>r.json())
   .then(res=>{
     if(!res.ok){
-      submitting=false;sendBtn.disabled=false;
+      submitting=false;
+      sendBtn.disabled=false;
       sendBtn.innerHTML="Konfirmasi Serah Terima";
-      status.innerHTML='<span class="err">'+res.msg+'</span>';return;
+      status.innerHTML='<span class="err">'+res.msg+'</span>';
+      return;
     }
     successPopup.style.display="flex";
   });
