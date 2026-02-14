@@ -75,10 +75,28 @@ img{
   font-size:14px;
   font-weight:600;
 }
-.ok{color:var(--success)}
 .err{color:var(--danger)}
 
-/* ===== MODAL KAMERA FULLSCREEN ===== */
+/* ===== LOADING ===== */
+.loading{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  justify-content:center;
+}
+.spinner{
+  width:18px;
+  height:18px;
+  border:3px solid #c7d2fe;
+  border-top-color:#1e3a8a;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+/* ===== MODAL KAMERA ===== */
 .modal{
   position:fixed;
   inset:0;
@@ -127,16 +145,16 @@ img{
 
 <div class="container">
 
-  <!-- CARD CARI DATA -->
+  <!-- CARI DATA -->
   <div class="card" id="searchCard">
     <label>Nomor Layanan</label>
     <input id="nomor" inputmode="numeric"
       placeholder="Masukkan nomor layanan"
       oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-    <button class="primary" onclick="cari()">Cari Data</button>
+    <button class="primary" id="searchBtn" onclick="cari()">Cari Data</button>
   </div>
 
-  <!-- CARD DATA -->
+  <!-- DATA -->
   <div class="card" id="dataCard" style="display:none">
     <div class="data-row"><div class="data-key">Nomor</div><div class="data-val" id="dNomor"></div></div>
     <div class="data-row"><div class="data-key">Kategori</div><div class="data-val" id="dKategori"></div></div>
@@ -147,14 +165,12 @@ img{
     <div class="data-row"><div class="data-key">Kota</div><div class="data-val" id="dKota"></div></div>
     <div class="data-row"><div class="data-key">Provinsi</div><div class="data-val" id="dProv"></div></div>
 
-    <button class="secondary" id="photoBtn" onclick="openCamera()">
-      Ambil Foto Bukti
-    </button>
+    <button class="secondary" id="photoBtn" onclick="openCamera()">Ambil Foto Bukti</button>
 
     <img id="preview">
 
     <button id="sendBtn" class="success" onclick="kirim()" style="display:none">
-      Konfirmasi Serah Terima
+      Konfirmasi
     </button>
   </div>
 
@@ -173,28 +189,34 @@ img{
 <!-- POPUP SUKSES -->
 <div class="popup" id="successPopup">
   <div class="popup-box">
-    <h3>✅ Serah Terima Berhasil</h3>
+    <h3>Serah Terima Berhasil</h3>
     <p>Data telah diperbarui dan<br>kartu telah diserahterimakan.</p>
     <button class="success" onclick="location.reload()">OK</button>
   </div>
 </div>
 
 <script>
-/* 🔴 GANTI DENGAN API ANDA */
 const API_URL = "https://script.google.com/macros/s/AKfycbwr80zl2RUdDzj1iuLicdKbXCE2JVWOSoqN4YEchhwOMHzGjnS77LQrzRUDK-SEth7TeQ/exec";
 
-let currentNomor = "";
-let fotoBase64  = "";
-let stream      = null;
+let currentNomor="", fotoBase64="", stream=null;
 
 function cari(){
   const nomorVal = nomor.value.trim();
   if(!nomorVal){
-    status.innerHTML = '<span class="err">Nomor layanan belum diisi</span>';
+    status.innerHTML='<span class="err">Nomor layanan belum diisi</span>';
     return;
   }
 
-  status.textContent = "Mencari data...";
+  // LOADING
+  searchBtn.disabled = true;
+  nomor.disabled = true;
+  searchBtn.innerHTML = `
+    <span class="loading">
+      <span class="spinner"></span>
+      Sedang mencari data...
+    </span>
+  `;
+  status.textContent="";
 
   fetch(API_URL,{
     method:"POST",
@@ -203,64 +225,65 @@ function cari(){
   })
   .then(r=>r.json())
   .then(res=>{
+    searchBtn.disabled=false;
+    nomor.disabled=false;
+    searchBtn.innerHTML="Cari Data";
+
     if(!res.ok){
       status.innerHTML='<span class="err">'+res.msg+'</span>';
       return;
     }
 
     currentNomor = nomorVal;
-    dataCard.style.display = "block";
+    dataCard.style.display="block";
 
-    dNomor.textContent = res.nomor_layanan;
-    dKategori.textContent = res.kategori;
-    dNik.textContent = res.nik;
-    dNama.textContent = res.nama;
-    dKel.textContent = res.kelurahan;
-    dKec.textContent = res.kecamatan;
-    dKota.textContent = res.kota;
-    dProv.textContent = res.provinsi;
-
-    status.textContent = "";
+    dNomor.textContent=res.nomor_layanan;
+    dKategori.textContent=res.kategori;
+    dNik.textContent=res.nik;
+    dNama.textContent=res.nama;
+    dKel.textContent=res.kelurahan;
+    dKec.textContent=res.kecamatan;
+    dKota.textContent=res.kota;
+    dProv.textContent=res.provinsi;
+  })
+  .catch(()=>{
+    searchBtn.disabled=false;
+    nomor.disabled=false;
+    searchBtn.innerHTML="Cari Data";
+    status.innerHTML='<span class="err">Gagal menghubungi server</span>';
   });
 }
 
 async function openCamera(){
-  cameraModal.style.display = "block";
-  stream = await navigator.mediaDevices.getUserMedia({
-    video:{facingMode:"environment"}
-  });
-  video.srcObject = stream;
+  cameraModal.style.display="block";
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+  video.srcObject=stream;
 }
 
 function closeCamera(){
-  if(stream){
-    stream.getTracks().forEach(t=>t.stop());
-  }
-  cameraModal.style.display = "none";
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  cameraModal.style.display="none";
 }
 
 function takePhoto(){
-  const c = document.createElement("canvas");
-  c.width  = video.videoWidth;
-  c.height = video.videoHeight;
+  const c=document.createElement("canvas");
+  c.width=video.videoWidth;
+  c.height=video.videoHeight;
   c.getContext("2d").drawImage(video,0,0);
 
-  fotoBase64 = c.toDataURL("image/jpeg",0.85);
-
-  preview.src = fotoBase64;
-  preview.style.display = "block";
+  fotoBase64=c.toDataURL("image/jpeg",0.85);
+  preview.src=fotoBase64;
+  preview.style.display="block";
 
   closeCamera();
 
-  // === UX FINAL SESUAI KEPUTUSAN ===
-  searchCard.style.display = "none"; // hilangkan cari data
-  photoBtn.style.display   = "none"; // hilangkan ambil foto
-  sendBtn.style.display    = "block"; // tampilkan konfirmasi
+  searchCard.style.display="none";
+  photoBtn.style.display="none";
+  sendBtn.style.display="block";
 }
 
 function kirim(){
-  sendBtn.disabled = true;
-
+  sendBtn.disabled=true;
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
