@@ -70,73 +70,44 @@ img{
   margin-top:12px;
   display:none;
 }
-.status{
-  text-align:center;
-  font-size:14px;
-  font-weight:600;
-}
+.status{text-align:center;font-weight:600}
 .err{color:var(--danger)}
 
 /* ===== LOADING ===== */
-.loading{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  justify-content:center;
-}
+.loading{display:inline-flex;align-items:center;gap:8px;justify-content:center}
 .spinner{
-  width:18px;
-  height:18px;
+  width:18px;height:18px;
   border:3px solid #c7d2fe;
   border-top-color:#1e3a8a;
   border-radius:50%;
   animation:spin 1s linear infinite;
 }
-@keyframes spin{
-  to{transform:rotate(360deg)}
-}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ===== MODAL KAMERA ===== */
 .modal{
-  position:fixed;
-  inset:0;
-  background:#000;
-  display:none;
-  z-index:9999;
+  position:fixed;inset:0;background:#000;
+  display:none;z-index:9999;
 }
-.modal video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
+.modal video{width:100%;height:100%;object-fit:cover}
 .modal-actions{
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  display:flex;
-  gap:12px;
-  padding:12px;
-  background:rgba(0,0,0,.7);
+  position:absolute;bottom:0;left:0;right:0;
+  display:flex;gap:12px;padding:12px;
+  background:rgba(0,0,0,.7)
 }
 .modal-actions button{flex:1}
 
-/* ===== POPUP SUKSES ===== */
+/* ===== POPUP ===== */
 .popup{
-  position:fixed;
-  inset:0;
+  position:fixed;inset:0;
   background:rgba(0,0,0,.5);
-  display:none;
-  align-items:center;
-  justify-content:center;
+  display:none;align-items:center;justify-content:center;
   z-index:9999;
 }
 .popup-box{
-  background:#fff;
-  padding:20px;
-  border-radius:16px;
-  text-align:center;
-  max-width:300px;
+  background:#fff;padding:20px;
+  border-radius:16px;text-align:center;
+  max-width:320px;
 }
 </style>
 </head>
@@ -166,9 +137,7 @@ img{
     <div class="data-row"><div class="data-key">Provinsi</div><div class="data-val" id="dProv"></div></div>
 
     <button class="secondary" id="photoBtn" onclick="openCamera()">Ambil Foto Bukti</button>
-
     <img id="preview">
-
     <button id="sendBtn" class="success" onclick="kirim()" style="display:none">
       Konfirmasi
     </button>
@@ -189,40 +158,43 @@ img{
 <!-- POPUP SUKSES -->
 <div class="popup" id="successPopup">
   <div class="popup-box">
-    <h3>Serah Terima Berhasil</h3>
-    <p>Data telah diperbarui dan<br>kartu telah diserahterimakan.</p>
+    <h3>Berhasil</h3>
+    <p>Data telah diperbarui dan kartu telah diserahterimakan.</p>
     <button class="success" onclick="location.reload()">OK</button>
+  </div>
+</div>
+
+<!-- POPUP SUDAH DITERIMA -->
+<div class="popup" id="errorPopup">
+  <div class="popup-box">
+    <h3 style="color:#b91c1c">Tidak Dapat Diproses</h3>
+    <p>Nomor layanan ini sudah pernah diserahterimakan.</p>
+    <button class="primary" onclick="location.reload()">OK</button>
   </div>
 </div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwr80zl2RUdDzj1iuLicdKbXCE2JVWOSoqN4YEchhwOMHzGjnS77LQrzRUDK-SEth7TeQ/exec";
 
-let currentNomor="", fotoBase64="", stream=null;
-let submitting=false;
+let currentNomor="", fotoBase64="", stream=null, submitting=false;
 
-/* ===================== CARI DATA ===================== */
+/* ===== CARI DATA ===== */
 function cari(){
-  const nomorVal = nomor.value.trim();
-  if(!nomorVal){
+  const val = nomor.value.trim();
+  if(!val){
     status.innerHTML='<span class="err">Nomor layanan belum diisi</span>';
     return;
   }
 
   searchBtn.disabled=true;
   nomor.disabled=true;
-  searchBtn.innerHTML=`
-    <span class="loading">
-      <span class="spinner"></span>
-      Sedang mencari data...
-    </span>
-  `;
+  searchBtn.innerHTML=`<span class="loading"><span class="spinner"></span>Mencari data...</span>`;
   status.textContent="";
 
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:"action=cari&nomor="+encodeURIComponent(nomorVal)
+    body:"action=cari&nomor="+encodeURIComponent(val)
   })
   .then(r=>r.json())
   .then(res=>{
@@ -231,13 +203,16 @@ function cari(){
     searchBtn.innerHTML="Cari Data";
 
     if(!res.ok){
+      if(res.msg.toLowerCase().includes("sudah")){
+        errorPopup.style.display="flex";
+        return;
+      }
       status.innerHTML='<span class="err">'+res.msg+'</span>';
       return;
     }
 
-    currentNomor=nomorVal;
+    currentNomor=val;
     dataCard.style.display="block";
-
     dNomor.textContent=res.nomor_layanan;
     dKategori.textContent=res.kategori;
     dNik.textContent=res.nik;
@@ -255,19 +230,18 @@ function cari(){
   });
 }
 
-/* ===================== KAMERA ===================== */
+/* ===== KAMERA ===== */
 async function openCamera(){
   cameraModal.style.display="block";
   stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
   video.srcObject=stream;
 }
-
 function closeCamera(){
   if(stream) stream.getTracks().forEach(t=>t.stop());
   cameraModal.style.display="none";
 }
 
-/* ===================== FOTO + WATERMARK ===================== */
+/* ===== FOTO + WATERMARK ===== */
 function takePhoto(){
   const c=document.createElement("canvas");
   c.width=video.videoWidth;
@@ -275,14 +249,9 @@ function takePhoto(){
   const ctx=c.getContext("2d");
   ctx.drawImage(video,0,0);
 
-  // === WATERMARK ===
   const now=new Date();
-  const stamp =
-    "No: "+currentNomor+" | "+
-    now.toLocaleDateString("id-ID")+" "+
-    now.toLocaleTimeString("id-ID");
-
-  ctx.fillStyle="rgba(0,0,0,0.6)";
+  const stamp="No: "+currentNomor+" | "+now.toLocaleString("id-ID");
+  ctx.fillStyle="rgba(0,0,0,.6)";
   ctx.fillRect(0,c.height-40,c.width,40);
   ctx.fillStyle="#fff";
   ctx.font="16px sans-serif";
@@ -293,24 +262,18 @@ function takePhoto(){
   preview.style.display="block";
 
   closeCamera();
-
   searchCard.style.display="none";
   photoBtn.style.display="none";
   sendBtn.style.display="block";
 }
 
-/* ===================== KIRIM (LOCK + LOADING) ===================== */
+/* ===== KIRIM ===== */
 function kirim(){
-  if(submitting) return; // HARD LOCK
+  if(submitting) return;
   submitting=true;
 
   sendBtn.disabled=true;
-  sendBtn.innerHTML=`
-    <span class="loading">
-      <span class="spinner"></span>
-      Mengirim data...
-    </span>
-  `;
+  sendBtn.innerHTML=`<span class="loading"><span class="spinner"></span>Mengirim data...</span>`;
 
   fetch(API_URL,{
     method:"POST",
