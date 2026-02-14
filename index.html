@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>Serah Terima Kartu Layanan Gratis</title>
 
 <style>
@@ -17,6 +16,7 @@
   --muted:#64748b;
   --border:#e2e8f0;
 }
+
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -24,7 +24,13 @@ body{
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   color:var(--text);
 }
-.container{max-width:480px;margin:0 auto;padding:16px}
+
+.container{
+  max-width:480px;
+  margin:0 auto;
+  padding:16px;
+}
+
 .card{
   background:var(--card);
   border-radius:16px;
@@ -32,6 +38,7 @@ body{
   box-shadow:0 1px 4px rgba(0,0,0,.08);
   margin-bottom:16px;
 }
+
 label{font-size:13px;color:var(--muted)}
 input{
   width:100%;
@@ -42,6 +49,7 @@ input{
   border:1px solid var(--border);
   text-align:center;
 }
+
 button{
   width:100%;
   padding:14px;
@@ -50,26 +58,77 @@ button{
   border:none;
   margin-top:14px;
 }
+
 .primary{background:var(--primary);color:#fff}
 .success{background:var(--success);color:#fff}
 .secondary{background:#fff;border:1px solid var(--border)}
-.data-row{display:flex;padding:8px 0;border-bottom:1px solid var(--border)}
+
+.data-row{
+  display:flex;
+  padding:8px 0;
+  border-bottom:1px solid var(--border)
+}
 .data-row:last-child{border-bottom:none}
 .data-key{width:120px;font-size:13px;color:var(--muted)}
 .data-val{flex:1;font-size:14px;font-weight:600}
-.camera-box{
-  display:none;
-  margin-top:12px;
-  aspect-ratio:4/3;
-  background:#000;
+
+img{
+  width:100%;
   border-radius:12px;
-  overflow:hidden;
+  margin-top:12px;
+  display:none;
 }
-video{width:100%;height:100%;object-fit:cover}
-img{width:100%;border-radius:12px;margin-top:12px;display:none}
-.status{text-align:center;font-size:14px;font-weight:600}
+
+.status{
+  text-align:center;
+  font-size:14px;
+  font-weight:600;
+}
 .ok{color:var(--success)}
 .err{color:var(--danger)}
+
+/* ===== MODAL KAMERA ===== */
+.modal{
+  position:fixed;
+  inset:0;
+  background:#000;
+  display:none;
+  z-index:9999;
+}
+.modal video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.modal-actions{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  gap:12px;
+  padding:12px;
+  background:rgba(0,0,0,.7);
+}
+.modal-actions button{flex:1}
+
+/* ===== POPUP SUKSES ===== */
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.popup-box{
+  background:#fff;
+  padding:20px;
+  border-radius:16px;
+  text-align:center;
+  max-width:300px;
+}
 </style>
 </head>
 
@@ -77,52 +136,62 @@ img{width:100%;border-radius:12px;margin-top:12px;display:none}
 
 <div class="container">
 
-<div class="card">
-  <label>Nomor Layanan</label>
-  <input id="nomor"
-    inputmode="numeric"
-    placeholder="Masukkan nomor layanan"
-    oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-  <button class="primary" onclick="cari()">Cari Data</button>
-</div>
-
-<div class="card" id="dataCard" style="display:none">
-  <div class="data-row"><div class="data-key">Nomor</div><div class="data-val" id="dNomor"></div></div>
-  <div class="data-row"><div class="data-key">Kategori</div><div class="data-val" id="dKategori"></div></div>
-  <div class="data-row"><div class="data-key">NIK</div><div class="data-val" id="dNik"></div></div>
-  <div class="data-row"><div class="data-key">Nama</div><div class="data-val" id="dNama"></div></div>
-  <div class="data-row"><div class="data-key">Kelurahan</div><div class="data-val" id="dKel"></div></div>
-  <div class="data-row"><div class="data-key">Kecamatan</div><div class="data-val" id="dKec"></div></div>
-  <div class="data-row"><div class="data-key">Kota</div><div class="data-val" id="dKota"></div></div>
-  <div class="data-row"><div class="data-key">Provinsi</div><div class="data-val" id="dProv"></div></div>
-
-  <button class="secondary" onclick="openCamera()">Ambil Foto Bukti</button>
-
-  <div class="camera-box" id="cameraBox">
-    <video id="video" autoplay playsinline></video>
+  <!-- INPUT NOMOR -->
+  <div class="card">
+    <label>Nomor Layanan</label>
+    <input id="nomor" inputmode="numeric"
+      placeholder="Masukkan nomor layanan"
+      oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+    <button class="primary" onclick="cari()">Cari Data</button>
   </div>
 
-  <img id="preview">
+  <!-- DATA WARGA -->
+  <div class="card" id="dataCard" style="display:none">
+    <div class="data-row"><div class="data-key">Nomor</div><div class="data-val" id="dNomor"></div></div>
+    <div class="data-row"><div class="data-key">Kategori</div><div class="data-val" id="dKategori"></div></div>
+    <div class="data-row"><div class="data-key">NIK</div><div class="data-val" id="dNik"></div></div>
+    <div class="data-row"><div class="data-key">Nama</div><div class="data-val" id="dNama"></div></div>
+    <div class="data-row"><div class="data-key">Kelurahan</div><div class="data-val" id="dKel"></div></div>
+    <div class="data-row"><div class="data-key">Kecamatan</div><div class="data-val" id="dKec"></div></div>
+    <div class="data-row"><div class="data-key">Kota</div><div class="data-val" id="dKota"></div></div>
+    <div class="data-row"><div class="data-key">Provinsi</div><div class="data-val" id="dProv"></div></div>
 
-  <button id="shotBtn" class="secondary" onclick="takePhoto()" style="display:none">Ambil Gambar</button>
-  <button id="sendBtn" class="success" onclick="kirim()" style="display:none">Konfirmasi Serah Terima</button>
+    <button class="secondary" onclick="openCamera()">Ambil Foto Bukti</button>
+    <img id="preview">
+    <button id="sendBtn" class="success" onclick="kirim()" style="display:none">
+      Konfirmasi Serah Terima
+    </button>
+  </div>
+
+  <div class="status" id="status"></div>
 </div>
 
-<div class="status" id="status"></div>
+<!-- MODAL KAMERA -->
+<div class="modal" id="cameraModal">
+  <video id="video" autoplay playsinline></video>
+  <div class="modal-actions">
+    <button class="secondary" onclick="closeCamera()">Batal</button>
+    <button class="primary" onclick="takePhoto()">Ambil Gambar</button>
+  </div>
+</div>
 
+<!-- POPUP SUKSES -->
+<div class="popup" id="successPopup">
+  <div class="popup-box">
+    <h3>✅ Serah Terima Berhasil</h3>
+    <p>Data telah diperbarui dan<br>kartu telah diserahterimakan.</p>
+    <button class="success" onclick="location.reload()">OK</button>
+  </div>
 </div>
 
 <script>
-/* 🔴 WAJIB DIGANTI */
 const API_URL = "https://script.google.com/macros/s/AKfycbwr80zl2RUdDzj1iuLicdKbXCE2JVWOSoqN4YEchhwOMHzGjnS77LQrzRUDK-SEth7TeQ/exec";
 
 let currentNomor="", fotoBase64="", stream=null;
 
 function cari(){
-  const nomor=document.getElementById("nomor").value.trim();
-  const status=document.getElementById("status");
-
-  if(!nomor){
+  const nomorVal = nomor.value.trim();
+  if(!nomorVal){
     status.innerHTML='<span class="err">Nomor layanan belum diisi</span>';
     return;
   }
@@ -132,17 +201,16 @@ function cari(){
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:"action=cari&nomor="+encodeURIComponent(nomor)
+    body:"action=cari&nomor="+encodeURIComponent(nomorVal)
   })
   .then(r=>r.json())
   .then(res=>{
-    console.log("RESP:",res);
     if(!res.ok){
       status.innerHTML='<span class="err">'+res.msg+'</span>';
       return;
     }
 
-    currentNomor=nomor;
+    currentNomor = nomorVal;
     dataCard.style.display="block";
 
     dNomor.textContent=res.nomor_layanan;
@@ -155,18 +223,20 @@ function cari(){
     dProv.textContent=res.provinsi;
 
     status.textContent="";
-  })
-  .catch(err=>{
-    status.innerHTML='<span class="err">Gagal menghubungi server</span>';
-    console.error(err);
   });
 }
 
 async function openCamera(){
-  cameraBox.style.display="block";
-  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
-  video.srcObject=stream;
-  shotBtn.style.display="block";
+  cameraModal.style.display="block";
+  stream = await navigator.mediaDevices.getUserMedia({
+    video:{facingMode:"environment"}
+  });
+  video.srcObject = stream;
+}
+
+function closeCamera(){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  cameraModal.style.display="none";
 }
 
 function takePhoto(){
@@ -174,14 +244,12 @@ function takePhoto(){
   c.width=video.videoWidth;
   c.height=video.videoHeight;
   c.getContext("2d").drawImage(video,0,0);
-  fotoBase64=c.toDataURL("image/jpeg",0.85);
 
-  preview.src=fotoBase64;
+  fotoBase64 = c.toDataURL("image/jpeg",0.85);
+  preview.src = fotoBase64;
   preview.style.display="block";
 
-  stream.getTracks().forEach(t=>t.stop());
-  cameraBox.style.display="none";
-  shotBtn.style.display="none";
+  closeCamera();
   sendBtn.style.display="block";
 }
 
@@ -190,7 +258,8 @@ function kirim(){
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:"action=serah_terima&nomor="+encodeURIComponent(currentNomor)+"&foto="+encodeURIComponent(fotoBase64.split(",")[1])
+    body:"action=serah_terima&nomor="+encodeURIComponent(currentNomor)
+      +"&foto="+encodeURIComponent(fotoBase64.split(",")[1])
   })
   .then(r=>r.json())
   .then(res=>{
@@ -199,8 +268,7 @@ function kirim(){
       sendBtn.disabled=false;
       return;
     }
-    status.innerHTML='<span class="ok">Serah terima berhasil</span>';
-    setTimeout(()=>location.reload(),1200);
+    successPopup.style.display="flex";
   });
 }
 </script>
