@@ -16,7 +16,6 @@
   --muted:#64748b;
   --border:#e2e8f0;
 }
-
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -24,13 +23,11 @@ body{
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   color:var(--text);
 }
-
 .container{
   max-width:480px;
   margin:0 auto;
   padding:16px;
 }
-
 .card{
   background:var(--card);
   border-radius:16px;
@@ -38,7 +35,6 @@ body{
   box-shadow:0 1px 4px rgba(0,0,0,.08);
   margin-bottom:16px;
 }
-
 label{font-size:13px;color:var(--muted)}
 input{
   width:100%;
@@ -49,7 +45,6 @@ input{
   border:1px solid var(--border);
   text-align:center;
 }
-
 button{
   width:100%;
   padding:14px;
@@ -58,11 +53,9 @@ button{
   border:none;
   margin-top:14px;
 }
-
 .primary{background:var(--primary);color:#fff}
 .success{background:var(--success);color:#fff}
 .secondary{background:#fff;border:1px solid var(--border)}
-
 .data-row{
   display:flex;
   padding:8px 0;
@@ -71,14 +64,12 @@ button{
 .data-row:last-child{border-bottom:none}
 .data-key{width:120px;font-size:13px;color:var(--muted)}
 .data-val{flex:1;font-size:14px;font-weight:600}
-
 img{
   width:100%;
   border-radius:12px;
   margin-top:12px;
   display:none;
 }
-
 .status{
   text-align:center;
   font-size:14px;
@@ -87,7 +78,7 @@ img{
 .ok{color:var(--success)}
 .err{color:var(--danger)}
 
-/* ===== MODAL KAMERA ===== */
+/* ===== MODAL KAMERA FULLSCREEN ===== */
 .modal{
   position:fixed;
   inset:0;
@@ -136,8 +127,8 @@ img{
 
 <div class="container">
 
-  <!-- INPUT NOMOR -->
-  <div class="card">
+  <!-- CARD CARI DATA -->
+  <div class="card" id="searchCard">
     <label>Nomor Layanan</label>
     <input id="nomor" inputmode="numeric"
       placeholder="Masukkan nomor layanan"
@@ -145,7 +136,7 @@ img{
     <button class="primary" onclick="cari()">Cari Data</button>
   </div>
 
-  <!-- DATA WARGA -->
+  <!-- CARD DATA -->
   <div class="card" id="dataCard" style="display:none">
     <div class="data-row"><div class="data-key">Nomor</div><div class="data-val" id="dNomor"></div></div>
     <div class="data-row"><div class="data-key">Kategori</div><div class="data-val" id="dKategori"></div></div>
@@ -156,8 +147,12 @@ img{
     <div class="data-row"><div class="data-key">Kota</div><div class="data-val" id="dKota"></div></div>
     <div class="data-row"><div class="data-key">Provinsi</div><div class="data-val" id="dProv"></div></div>
 
-    <button class="secondary" onclick="openCamera()">Ambil Foto Bukti</button>
+    <button class="secondary" id="photoBtn" onclick="openCamera()">
+      Ambil Foto Bukti
+    </button>
+
     <img id="preview">
+
     <button id="sendBtn" class="success" onclick="kirim()" style="display:none">
       Konfirmasi Serah Terima
     </button>
@@ -185,18 +180,21 @@ img{
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwr80zl2RUdDzj1iuLicdKbXCE2JVWOSoqN4YEchhwOMHzGjnS77LQrzRUDK-SEth7TeQ/exec";
+/* 🔴 GANTI DENGAN API ANDA */
+const API_URL = "PASTE_API_URL_ANDA_DI_SINI";
 
-let currentNomor="", fotoBase64="", stream=null;
+let currentNomor = "";
+let fotoBase64  = "";
+let stream      = null;
 
 function cari(){
   const nomorVal = nomor.value.trim();
   if(!nomorVal){
-    status.innerHTML='<span class="err">Nomor layanan belum diisi</span>';
+    status.innerHTML = '<span class="err">Nomor layanan belum diisi</span>';
     return;
   }
 
-  status.textContent="Mencari data...";
+  status.textContent = "Mencari data...";
 
   fetch(API_URL,{
     method:"POST",
@@ -211,23 +209,23 @@ function cari(){
     }
 
     currentNomor = nomorVal;
-    dataCard.style.display="block";
+    dataCard.style.display = "block";
 
-    dNomor.textContent=res.nomor_layanan;
-    dKategori.textContent=res.kategori;
-    dNik.textContent=res.nik;
-    dNama.textContent=res.nama;
-    dKel.textContent=res.kelurahan;
-    dKec.textContent=res.kecamatan;
-    dKota.textContent=res.kota;
-    dProv.textContent=res.provinsi;
+    dNomor.textContent = res.nomor_layanan;
+    dKategori.textContent = res.kategori;
+    dNik.textContent = res.nik;
+    dNama.textContent = res.nama;
+    dKel.textContent = res.kelurahan;
+    dKec.textContent = res.kecamatan;
+    dKota.textContent = res.kota;
+    dProv.textContent = res.provinsi;
 
-    status.textContent="";
+    status.textContent = "";
   });
 }
 
 async function openCamera(){
-  cameraModal.style.display="block";
+  cameraModal.style.display = "block";
   stream = await navigator.mediaDevices.getUserMedia({
     video:{facingMode:"environment"}
   });
@@ -235,26 +233,34 @@ async function openCamera(){
 }
 
 function closeCamera(){
-  if(stream) stream.getTracks().forEach(t=>t.stop());
-  cameraModal.style.display="none";
+  if(stream){
+    stream.getTracks().forEach(t=>t.stop());
+  }
+  cameraModal.style.display = "none";
 }
 
 function takePhoto(){
-  const c=document.createElement("canvas");
-  c.width=video.videoWidth;
-  c.height=video.videoHeight;
+  const c = document.createElement("canvas");
+  c.width  = video.videoWidth;
+  c.height = video.videoHeight;
   c.getContext("2d").drawImage(video,0,0);
 
   fotoBase64 = c.toDataURL("image/jpeg",0.85);
+
   preview.src = fotoBase64;
-  preview.style.display="block";
+  preview.style.display = "block";
 
   closeCamera();
-  sendBtn.style.display="block";
+
+  // === UX FINAL SESUAI KEPUTUSAN ===
+  searchCard.style.display = "none"; // hilangkan cari data
+  photoBtn.style.display   = "none"; // hilangkan ambil foto
+  sendBtn.style.display    = "block"; // tampilkan konfirmasi
 }
 
 function kirim(){
-  sendBtn.disabled=true;
+  sendBtn.disabled = true;
+
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
