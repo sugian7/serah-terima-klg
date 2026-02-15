@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Serah Terima KLG Jakarta</title>
 
+<!-- WAJIB UNTUK PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3a8a">
+
 <style>
 :root{
   --primary:#1e3a8a;
@@ -326,17 +330,12 @@ function kirim(){
   });
 }
 </script>
+
+<!-- SERVICE WORKER REGISTER -->
 <script>
-  
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js")
-      .then(() => {
-        console.log("Service Worker registered");
-      })
-      .catch(err => {
-        console.error("Service Worker failed:", err);
-      });
+    navigator.serviceWorker.register("./service-worker.js");
   });
 }
 </script>
