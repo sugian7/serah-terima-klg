@@ -1,7 +1,7 @@
 {
-  "name": "Serah Terima KLG Jakarta",
-  "short_name": "Serah Terima KLG",
-  "description": "Aplikasi serah terima Kartu Layanan Gratis Jakarta",
+  "name": "Terima KLG",
+  "short_name": "Terima KLG",
+  "description": "Aplikasi penerimaan Kartu Layanan Gratis",
   "start_url": "/serah-terima-klg/",
   "display": "standalone",
   "background_color": "#ffffff",
