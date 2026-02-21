@@ -59,9 +59,13 @@ button{
 .data-val{font-size:14px;font-weight:600}
 
 #preview{
-  width:100%;max-height:320px;
-  object-fit:contain;border-radius:12px;
-  margin-top:12px;display:none;background:#000
+  width:100%;
+  max-height:320px;
+  object-fit:contain;
+  border-radius:12px;
+  margin-top:12px;
+  display:none;
+  background:#000
 }
 
 #bigStatus{
@@ -107,7 +111,7 @@ button{
 
 <div class="container">
   
-  <div class="card">
+  <div class="card" id="searchCard">
     <label>Nomor Layanan</label>
     <input id="nomor" inputmode="numeric"
       placeholder="Masukkan nomor layanan"
@@ -130,7 +134,7 @@ button{
     <div class="data-row"><div class="data-key">Kota</div><div class="data-val" id="dKota"></div></div>
     <div class="data-row"><div class="data-key">Provinsi</div><div class="data-val" id="dProv"></div></div>
 
-    <button class="secondary" onclick="openCamera()">Ambil Foto Bukti</button>
+    <button class="secondary" id="btnAmbilFoto" onclick="openCamera()">Ambil Foto Bukti</button>
     <img id="preview">
     <button id="sendBtn" class="success" onclick="kirim()" style="display:none">
       Konfirmasi Serah Terima
@@ -159,9 +163,7 @@ function showLoading(){globalLoading.style.display="flex";}
 function hideLoading(){globalLoading.style.display="none";}
 
 function showStatus(msg,type,duration=3000){
-
   clearTimeout(statusTimeout);
-
   bigStatus.style.display="block";
   bigStatus.style.opacity="1";
   bigStatus.innerText=msg;
@@ -187,10 +189,11 @@ function resetUI(){
   dataCard.style.display="none";
   preview.style.display="none";
   sendBtn.style.display="none";
+  btnAmbilFoto.style.display="block";
+  searchCard.style.display="block";
 }
 
 function cari(){
-
   resetUI();
 
   if(!navigator.onLine){
@@ -256,16 +259,26 @@ function takePhoto(){
   c.width=video.videoWidth;
   c.height=video.videoHeight;
   c.getContext("2d").drawImage(video,0,0);
+
   fotoBase64=c.toDataURL("image/jpeg",0.6);
+
   preview.src=fotoBase64;
   preview.style.display="block";
+
   closeCamera();
+
+  // MODE KONFIRMASI
+  btnAmbilFoto.style.display="none";
+  searchCard.style.display="none";
   sendBtn.style.display="block";
+
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function kirim(){
   if(submitting) return;
   submitting=true;
+
   showLoading();
   sendBtn.disabled=true;
 
@@ -293,10 +306,6 @@ function kirim(){
     },2000);
   });
 }
-
-window.addEventListener("offline",()=>{
-  showStatus("Koneksi terputus","error",0);
-});
 </script>
 
 <script>
