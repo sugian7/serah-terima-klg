@@ -106,7 +106,7 @@ button{
 
 <div class="container">
   
-  <div class="card" id="searchCard">
+  <div class="card">
     <label>Nomor Layanan</label>
     <input id="nomor" inputmode="numeric"
       placeholder="Masukkan nomor layanan"
@@ -148,8 +148,8 @@ button{
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwebTkxbityfs7OvkF27LVonG3c9wfY5ylrd8zrxVikLiBjOtk4ld1zhx7IXwGwOE5PNg/exec";
-const SECRET_KEY = "yhggt5540YhGGtxthpBGTSugiantech";
+const API_URL="https://script.google.com/macros/s/AKfycbwebTkxbityfs7OvkF27LVonG3c9wfY5ylrd8zrxVikLiBjOtk4ld1zhx7IXwGwOE5PNg/exec";
+const SECRET_KEY="yhggt5540YhGGtxthpBGTSugiantech";
 
 let currentNomor="", fotoBase64="", stream=null, submitting=false;
 
@@ -167,10 +167,27 @@ function showStatus(msg,type){
   }
 }
 
+function resetUI(){
+  bigStatus.style.display="none";
+  dataCard.style.display="none";
+  preview.style.display="none";
+  sendBtn.style.display="none";
+}
+
 function cari(){
-  if(!navigator.onLine){showStatus("Tidak ada koneksi","error");return;}
+
+  resetUI();
+
+  if(!navigator.onLine){
+    showStatus("Tidak ada koneksi","error");
+    return;
+  }
+
   const val=nomor.value.trim();
-  if(!val){showStatus("Nomor belum diisi","error");return;}
+  if(!val){
+    showStatus("Nomor belum diisi","error");
+    return;
+  }
 
   showLoading();
   searchBtn.disabled=true;
@@ -185,7 +202,10 @@ function cari(){
     hideLoading();
     searchBtn.disabled=false;
 
-    if(!res.ok){showStatus(res.msg,"error");return;}
+    if(!res.ok){
+      showStatus(res.msg,"error");
+      return;
+    }
 
     currentNomor=val;
     dataCard.style.display="block";
@@ -218,7 +238,8 @@ function closeCamera(){
 
 function takePhoto(){
   const c=document.createElement("canvas");
-  c.width=video.videoWidth;c.height=video.videoHeight;
+  c.width=video.videoWidth;
+  c.height=video.videoHeight;
   c.getContext("2d").drawImage(video,0,0);
   fotoBase64=c.toDataURL("image/jpeg",0.6);
   preview.src=fotoBase64;
@@ -244,19 +265,23 @@ function kirim(){
     submitting=false;
     sendBtn.disabled=false;
 
-    if(!res.ok){showStatus(res.msg,"error");return;}
+    if(!res.ok){
+      showStatus(res.msg,"error");
+      return;
+    }
 
     showStatus("Serah Terima Berhasil","success");
 
     setTimeout(()=>{
       nomor.value="";
-      dataCard.style.display="none";
-      preview.style.display="none";
-      sendBtn.style.display="none";
-      bigStatus.style.display="none";
+      resetUI();
     },2000);
   });
 }
+
+window.addEventListener("offline",()=>{
+  showStatus("Koneksi terputus","error");
+});
 </script>
 
 <script>
