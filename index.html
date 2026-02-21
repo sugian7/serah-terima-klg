@@ -153,7 +153,7 @@ button{
 </div>
 
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbxCoHnrEhDnS9m23GHJuAxbP0BPn6BJyEePyi-nuqPN2XmCZzmMbjNaapLmeTC8FKBimg/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbyvDg-srBmcdq8d6_QhpCG9jTXs-MSGrRJncleKa83JozrIA_xzemE87QVFq45HZhwToA/exec";
 const SECRET_KEY="yhggt5540YhGGtxthpBGTSugiantech";
 
 let currentNomor="", fotoBase64="", stream=null, submitting=false;
@@ -195,17 +195,8 @@ function resetUI(){
 
 function cari(){
   resetUI();
-
-  if(!navigator.onLine){
-    showStatus("Tidak ada koneksi","error",0);
-    return;
-  }
-
   const val=nomor.value.trim();
-  if(!val){
-    showStatus("Nomor belum diisi","error");
-    return;
-  }
+  if(!val){ showStatus("Nomor belum diisi","error"); return; }
 
   showLoading();
   searchBtn.disabled=true;
@@ -220,10 +211,7 @@ function cari(){
     hideLoading();
     searchBtn.disabled=false;
 
-    if(!res.ok){
-      showStatus(res.msg,"error");
-      return;
-    }
+    if(!res.ok){ showStatus(res.msg,"error"); return; }
 
     currentNomor=val;
     dataCard.style.display="block";
@@ -236,16 +224,12 @@ function cari(){
     dKec.textContent=res.kecamatan;
     dKota.textContent=res.kota;
     dProv.textContent=res.provinsi;
-
-    dataCard.scrollIntoView({behavior:"smooth"});
   });
 }
 
 async function openCamera(){
   cameraModal.style.display="block";
-  stream=await navigator.mediaDevices.getUserMedia({
-    video:{facingMode:"environment",width:{ideal:1280},height:{ideal:720}}
-  });
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
   video.srcObject=stream;
 }
 
@@ -267,25 +251,23 @@ function takePhoto(){
 
   closeCamera();
 
-  // MODE KONFIRMASI
   btnAmbilFoto.style.display="none";
   searchCard.style.display="none";
   sendBtn.style.display="block";
-
-  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function kirim(){
   if(submitting) return;
-  submitting=true;
+  if(!fotoBase64){ showStatus("Foto belum diambil","error"); return; }
 
+  submitting=true;
   showLoading();
   sendBtn.disabled=true;
 
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:`key=${SECRET_KEY}&action=serah_terima&nomor=${currentNomor}&foto=${fotoBase64.split(",")[1]}`
+    body:`key=${SECRET_KEY}&action=serah_terima&nomor=${currentNomor}&foto=${encodeURIComponent(fotoBase64.split(",")[1])}`
   })
   .then(r=>r.json())
   .then(res=>{
@@ -293,10 +275,7 @@ function kirim(){
     submitting=false;
     sendBtn.disabled=false;
 
-    if(!res.ok){
-      showStatus(res.msg,"error");
-      return;
-    }
+    if(!res.ok){ showStatus(res.msg,"error"); return; }
 
     showStatus("Serah Terima Berhasil","success");
 
@@ -304,6 +283,12 @@ function kirim(){
       nomor.value="";
       resetUI();
     },2000);
+  })
+  .catch(()=>{
+    hideLoading();
+    submitting=false;
+    sendBtn.disabled=false;
+    showStatus("Terjadi kesalahan koneksi","error",0);
   });
 }
 </script>
