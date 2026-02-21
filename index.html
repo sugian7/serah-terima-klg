@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Terima KLG</title>
 
-<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1e3a8a">
 
 <style>
@@ -16,14 +15,10 @@
   --bg:#f4f6f8;
   --card:#ffffff;
   --border:#e2e8f0;
-  --label:#64748b;
-  --text:#0f172a;
 }
-*{box-sizing:border-box}
 body{
   margin:0;background:var(--bg);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  color:var(--text);
+  font-family:system-ui;
 }
 .container{max-width:480px;margin:0 auto;padding:16px}
 .card{
@@ -33,7 +28,6 @@ body{
   box-shadow:0 1px 4px rgba(0,0,0,.08);
   margin-bottom:16px;
 }
-label{font-size:13px;color:var(--label)}
 input{
   width:100%;padding:14px;margin-top:6px;
   font-size:18px;border-radius:12px;
@@ -47,104 +41,100 @@ button{
 .primary{background:var(--primary);color:#fff}
 .secondary{background:#fff;border:1px solid var(--border)}
 .success{background:var(--success);color:#fff}
-.err{color:var(--danger);font-weight:600;text-align:center}
-.status{text-align:center;font-size:14px;font-weight:600}
-
-.data-row{
-  display:grid;
-  grid-template-columns:110px 1fr;
-  gap:8px;padding:8px 0;
-  border-bottom:1px solid var(--border)
+.status-big{
+  display:none;
+  padding:16px;
+  border-radius:12px;
+  font-weight:700;
+  text-align:center;
+  margin-top:12px;
 }
-.data-row:last-child{border-bottom:none}
-.data-key{font-size:12px;color:var(--label)}
-.data-val{font-size:14px;font-weight:600}
-
 #preview{
-  width:100%;max-height:320px;
-  object-fit:contain;border-radius:12px;
-  margin-top:12px;display:none;background:#000
+  width:100%;
+  max-height:300px;
+  object-fit:contain;
+  border-radius:12px;
+  margin-top:12px;
+  display:none;
 }
-
-.loading{display:inline-flex;gap:8px;align-items:center;justify-content:center}
-.spinner{
-  width:18px;height:18px;border:3px solid #c7d2fe;
-  border-top-color:#1e3a8a;border-radius:50%;
-  animation:spin 1s linear infinite
+#globalLoading{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  color:#fff;
+  font-size:18px;
+  font-weight:600;
 }
-@keyframes spin{to{transform:rotate(360deg)}}
-
-.modal{
-  position:fixed;inset:0;background:#000;
-  display:none;z-index:9999
-}
-.modal video{width:100%;height:100%;object-fit:cover}
-.modal-actions{
-  position:absolute;bottom:0;left:0;right:0;
-  display:flex;gap:12px;padding:12px;
-  background:rgba(0,0,0,.7)
-}
-.modal-actions button{flex:1}
 </style>
 </head>
 
 <body>
 
+<div id="globalLoading">Memproses...</div>
+
 <div class="container">
-  
-  <div class="card" id="searchCard">
-    <label>Nomor Layanan</label>
-    <input id="nomor" inputmode="numeric"
-      placeholder="Masukkan nomor layanan"
-      oninput="this.value=this.value.replace(/[^0-9]/g,'')">
 
-    <button class="primary" id="searchBtn" onclick="cari()">Cari Data</button>
-    
-    <button class="secondary" id="installBtn" style="display:none">
-      Pasang Aplikasi
-    </button>
-  </div>
-  
-  <div class="card" id="dataCard" style="display:none">
-    <div class="data-row"><div class="data-key">Nomor</div><div class="data-val" id="dNomor"></div></div>
-    <div class="data-row"><div class="data-key">Kategori</div><div class="data-val" id="dKategori"></div></div>
-    <div class="data-row"><div class="data-key">NIK</div><div class="data-val" id="dNik"></div></div>
-    <div class="data-row"><div class="data-key">Nama</div><div class="data-val" id="dNama"></div></div>
-    <div class="data-row"><div class="data-key">Kelurahan</div><div class="data-val" id="dKel"></div></div>
-    <div class="data-row"><div class="data-key">Kecamatan</div><div class="data-val" id="dKec"></div></div>
-    <div class="data-row"><div class="data-key">Kota</div><div class="data-val" id="dKota"></div></div>
-    <div class="data-row"><div class="data-key">Provinsi</div><div class="data-val" id="dProv"></div></div>
-
-    <button class="secondary" onclick="openCamera()">Ambil Foto Bukti</button>
-    <img id="preview">
-    <button id="sendBtn" class="success" onclick="kirim()" style="display:none">
-      Konfirmasi Serah Terima
-    </button>
-  </div>
-
-  <div class="status" id="status"></div>
+<div class="card">
+  <label>Nomor Layanan</label>
+  <input id="nomor" inputmode="numeric"
+    placeholder="Masukkan nomor layanan"
+    oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+  <button class="primary" id="searchBtn" onclick="cari()">Cari Data</button>
 </div>
 
-<div class="modal" id="cameraModal">
-  <video id="video" autoplay playsinline></video>
-  <div class="modal-actions">
-    <button class="secondary" onclick="closeCamera()">Batal</button>
-    <button class="primary" onclick="takePhoto()">Ambil Gambar</button>
-  </div>
+<div class="card" id="dataCard" style="display:none">
+  <div id="dataArea"></div>
+  <button class="secondary" onclick="openCamera()">Ambil Foto Bukti</button>
+  <img id="preview">
+  <button id="sendBtn" class="success" onclick="kirim()" style="display:none">
+    Konfirmasi Serah Terima
+  </button>
+</div>
+
+<div id="bigStatus" class="status-big"></div>
+
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyX8gr4rVAOBpgdBMO1_G2jzsB_TdMTjfxDLSsb53OjAMp97Kb8kjrWMP0Hv5WNs0kz6Q/exec";
-const SECRET_KEY = "yhggt5540YhGGtxthpBGTSugiantech";
+const API_URL="https://script.google.com/macros/s/AKfycbwebTkxbityfs7OvkF27LVonG3c9wfY5ylrd8zrxVikLiBjOtk4ld1zhx7IXwGwOE5PNg/exec";
+const SECRET_KEY="yhggt5540YhGGtxthpBGTSugiantech";
 
 let currentNomor="", fotoBase64="", stream=null, submitting=false;
 
-function cari(){
-  const val=nomor.value.trim();
-  if(!val){status.innerHTML='<span class="err">Nomor layanan belum diisi</span>';return;}
+function showLoading(){globalLoading.style.display="flex";}
+function hideLoading(){globalLoading.style.display="none";}
 
+function showStatus(msg,type){
+  bigStatus.style.display="block";
+  bigStatus.innerText=msg;
+  if(type==="success"){
+    bigStatus.style.background="#dcfce7";
+    bigStatus.style.color="#166534";
+  }else{
+    bigStatus.style.background="#fee2e2";
+    bigStatus.style.color="#991b1b";
+  }
+}
+
+function cari(){
+
+  if(!navigator.onLine){
+    showStatus("Tidak ada koneksi internet","error");
+    return;
+  }
+
+  const val=nomor.value.trim();
+  if(!val){
+    showStatus("Nomor belum diisi","error");
+    return;
+  }
+
+  showLoading();
   searchBtn.disabled=true;
-  searchBtn.innerHTML=`<span class="loading"><span class="spinner"></span>Mencari...</span>`;
 
   fetch(API_URL,{
     method:"POST",
@@ -153,50 +143,64 @@ function cari(){
   })
   .then(r=>r.json())
   .then(res=>{
+    hideLoading();
     searchBtn.disabled=false;
-    searchBtn.innerHTML="Cari Data";
 
-    if(!res.ok){status.innerHTML='<span class="err">'+res.msg+'</span>';return;}
+    if(!res.ok){
+      showStatus(res.msg,"error");
+      return;
+    }
 
     currentNomor=val;
     dataCard.style.display="block";
-    dNomor.textContent=res.nomor_layanan;
-    dKategori.textContent=res.kategori;
-    dNik.textContent=res.nik;
-    dNama.textContent=res.nama;
-    dKel.textContent=res.kelurahan;
-    dKec.textContent=res.kecamatan;
-    dKota.textContent=res.kota;
-    dProv.textContent=res.provinsi;
+
+    dataArea.innerHTML=`
+      <b>Nama:</b> ${res.nama}<br>
+      <b>NIK:</b> ${res.nik}<br>
+      <b>Kelurahan:</b> ${res.kelurahan}<br>
+      <b>Kecamatan:</b> ${res.kecamatan}<br>
+      <b>Kota:</b> ${res.kota}
+    `;
+
+    dataCard.scrollIntoView({behavior:"smooth"});
   });
 }
 
 async function openCamera(){
-  cameraModal.style.display="block";
-  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
-  video.srcObject=stream;
-}
-function closeCamera(){
-  if(stream) stream.getTracks().forEach(t=>t.stop());
-  cameraModal.style.display="none";
-}
+  stream=await navigator.mediaDevices.getUserMedia({
+    video:{
+      facingMode:"environment",
+      width:{ideal:1280},
+      height:{ideal:720}
+    }
+  });
 
-function takePhoto(){
-  const c=document.createElement("canvas");
-  c.width=video.videoWidth;c.height=video.videoHeight;
-  const ctx=c.getContext("2d");
-  ctx.drawImage(video,0,0);
-  fotoBase64=c.toDataURL("image/jpeg",0.85);
-  preview.src=fotoBase64;
-  preview.style.display="block";
-  closeCamera();
-  sendBtn.style.display="block";
+  const video=document.createElement("video");
+  video.srcObject=stream;
+  video.play();
+
+  setTimeout(()=>{
+    const canvas=document.createElement("canvas");
+    canvas.width=video.videoWidth;
+    canvas.height=video.videoHeight;
+    canvas.getContext("2d").drawImage(video,0,0);
+
+    fotoBase64=canvas.toDataURL("image/jpeg",0.6);
+    preview.src=fotoBase64;
+    preview.style.display="block";
+    sendBtn.style.display="block";
+
+    stream.getTracks().forEach(t=>t.stop());
+  },1500);
 }
 
 function kirim(){
+
   if(submitting) return;
   submitting=true;
-  sendBtn.innerHTML="Mengirim...";
+
+  showLoading();
+  sendBtn.disabled=true;
 
   fetch(API_URL,{
     method:"POST",
@@ -205,51 +209,30 @@ function kirim(){
   })
   .then(r=>r.json())
   .then(res=>{
-    if(!res.ok){sendBtn.innerHTML="Konfirmasi";submitting=false;alert(res.msg);return;}
-    alert("Berhasil");
-    location.reload();
+    hideLoading();
+    submitting=false;
+    sendBtn.disabled=false;
+
+    if(!res.ok){
+      showStatus(res.msg,"error");
+      return;
+    }
+
+    showStatus("Serah Terima Berhasil","success");
+
+    setTimeout(()=>{
+      nomor.value="";
+      dataCard.style.display="none";
+      preview.style.display="none";
+      sendBtn.style.display="none";
+      bigStatus.style.display="none";
+    },2000);
   });
 }
-</script>
 
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js")
-    .then(reg => {
-
-      reg.addEventListener("updatefound", () => {
-        const newWorker = reg.installing;
-
-        newWorker.addEventListener("statechange", () => {
-          if (
-            newWorker.state === "activated" &&
-            navigator.serviceWorker.controller
-          ) {
-            location.reload();
-          }
-        });
-      });
-
-    });
-}
-</script>
-
-<script>
-let deferredPrompt;
-const installBtn=document.getElementById("installBtn");
-
-window.addEventListener("beforeinstallprompt",e=>{
-  e.preventDefault();
-  deferredPrompt=e;
-  installBtn.style.display="block";
+window.addEventListener("offline",()=>{
+  showStatus("Koneksi terputus","error");
 });
-installBtn.addEventListener("click",async()=>{
-  if(!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt=null;
-  installBtn.style.display="none";
-});
-window.addEventListener("appinstalled",()=>installBtn.style.display="none");
 </script>
 
 </body>
