@@ -71,6 +71,7 @@ button{
   font-weight:700;
   text-align:center;
   margin-top:12px;
+  transition:opacity .3s ease;
 }
 
 #globalLoading{
@@ -152,18 +153,32 @@ const API_URL="https://script.google.com/macros/s/AKfycbwebTkxbityfs7OvkF27LVonG
 const SECRET_KEY="yhggt5540YhGGtxthpBGTSugiantech";
 
 let currentNomor="", fotoBase64="", stream=null, submitting=false;
+let statusTimeout;
 
 function showLoading(){globalLoading.style.display="flex";}
 function hideLoading(){globalLoading.style.display="none";}
-function showStatus(msg,type){
+
+function showStatus(msg,type,duration=3000){
+
+  clearTimeout(statusTimeout);
+
   bigStatus.style.display="block";
+  bigStatus.style.opacity="1";
   bigStatus.innerText=msg;
+
   if(type==="success"){
     bigStatus.style.background="#dcfce7";
     bigStatus.style.color="#166534";
   }else{
     bigStatus.style.background="#fee2e2";
     bigStatus.style.color="#991b1b";
+  }
+
+  if(duration>0){
+    statusTimeout=setTimeout(()=>{
+      bigStatus.style.opacity="0";
+      setTimeout(()=>{bigStatus.style.display="none";},300);
+    },duration);
   }
 }
 
@@ -179,7 +194,7 @@ function cari(){
   resetUI();
 
   if(!navigator.onLine){
-    showStatus("Tidak ada koneksi","error");
+    showStatus("Tidak ada koneksi","error",0);
     return;
   }
 
@@ -280,7 +295,7 @@ function kirim(){
 }
 
 window.addEventListener("offline",()=>{
-  showStatus("Koneksi terputus","error");
+  showStatus("Koneksi terputus","error",0);
 });
 </script>
 
