@@ -5,209 +5,155 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Terima KLG</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1e3a8a">
-
 <style>
-:root{
-  --primary:#1e3a8a;
-  --success:#15803d;
-  --danger:#b91c1c;
-  --bg:#f4f6f8;
-  --card:#ffffff;
-  --border:#e2e8f0;
-  --label:#64748b;
-  --text:#0f172a;
-}
-*{box-sizing:border-box}
 body{
-  margin:0;background:var(--bg);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  color:var(--text);
+  margin:0;
+  background:#f4f6f8;
+  font-family:system-ui;
 }
-.container{max-width:480px;margin:0 auto;padding:16px}
-.card{
-  background:var(--card);
-  border-radius:16px;
+.container{
+  max-width:480px;
+  margin:0 auto;
   padding:16px;
+}
+.card{
+  background:#fff;
+  padding:16px;
+  border-radius:16px;
   box-shadow:0 1px 4px rgba(0,0,0,.08);
   margin-bottom:16px;
 }
-label{font-size:13px;color:var(--label)}
-input{
-  width:100%;padding:14px;margin-top:6px;
-  font-size:18px;border-radius:12px;
-  border:1px solid var(--border);
-  text-align:center;
-}
 button{
-  width:100%;padding:14px;font-size:16px;
-  border-radius:12px;border:none;margin-top:14px;
+  width:100%;
+  padding:14px;
+  margin-top:14px;
+  border-radius:12px;
+  border:none;
+  background:#1e3a8a;
+  color:#fff;
 }
-.primary{background:var(--primary);color:#fff}
-.secondary{background:#fff;border:1px solid var(--border)}
-.success{background:var(--success);color:#fff}
-
 #preview{
   width:100%;
-  max-height:320px;
-  object-fit:contain;
-  border-radius:12px;
   margin-top:12px;
   display:none;
-  background:#000
 }
-
-#bigStatus{
-  display:none;
-  padding:16px;
-  border-radius:12px;
-  font-weight:700;
-  text-align:center;
-  margin-top:12px;
-}
-
-#globalLoading{
+#loading{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.5);
   display:none;
+  background:rgba(0,0,0,.5);
+  color:#fff;
   align-items:center;
   justify-content:center;
-  z-index:9999;
-  color:#fff;
   font-size:18px;
-  font-weight:600;
 }
 </style>
 </head>
 
 <body>
 
-<div id="globalLoading">Memproses...</div>
+<div id="loading">Memproses...</div>
 
 <div class="container">
-  
-  <div class="card" id="searchCard">
-    <label>Nomor Layanan</label>
-    <input id="nomor" inputmode="numeric"
-      placeholder="Masukkan nomor layanan"
-      oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-    <button class="primary" onclick="cari()">Cari Data</button>
+
+  <div class="card">
+    <input id="nomor" placeholder="Nomor Layanan">
+    <button onclick="cari()">Cari Data</button>
   </div>
-  
+
   <div class="card" id="dataCard" style="display:none">
-    <div><b>Nama:</b> <span id="dNama"></span></div>
-    <div><b>NIK:</b> <span id="dNik"></span></div>
-    <div><b>Kategori:</b> <span id="dKategori"></span></div>
+    <div><b>Nama:</b> <span id="nama"></span></div>
+    <div><b>NIK:</b> <span id="nik"></span></div>
+    <div><b>Kategori:</b> <span id="kategori"></span></div>
 
-    <button class="secondary" onclick="openCamera()">Ambil Foto Bukti</button>
+    <button onclick="ambilFoto()">Ambil Foto</button>
     <img id="preview">
-    <button id="sendBtn" class="success" onclick="kirim()" style="display:none">
-      Konfirmasi Serah Terima
-    </button>
+    <button id="btnKirim" style="display:none" onclick="kirim()">Konfirmasi</button>
   </div>
 
-  <div id="bigStatus"></div>
 </div>
 
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbwZiVCGxiy40-s6wgHt5nd34VwmPvTwhwAAL6xg5vWRZs3h1NPbSOdEmrAEPm3WprRF/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbyYyEbkf3sbbDyLxXfmGZP49owPjL-SK24clUKS2Jk4mIkIreVU3S38kb_u8XB2XAs/exec";
 const SECRET_KEY="yhggt5540YhGGtxthpBGTSugiantech";
 
-let currentNomor="", fotoBase64="", stream=null;
+let currentNomor="";
+let fotoBase64="";
 
-function showLoading(){globalLoading.style.display="flex";}
-function hideLoading(){globalLoading.style.display="none";}
-
-function showStatus(msg,type="error"){
-  bigStatus.style.display="block";
-  bigStatus.innerText=msg;
-  bigStatus.style.background= type==="success"?"#dcfce7":"#fee2e2";
-}
+function showLoading(){ loading.style.display="flex"; }
+function hideLoading(){ loading.style.display="none"; }
 
 function cari(){
-  const val=nomor.value.trim();
-  if(!val){ showStatus("Nomor kosong"); return;}
+  const val = nomor.value.trim();
+  if(!val) return;
 
   showLoading();
 
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:`key=${SECRET_KEY}&action=cari&nomor=${val}&origin=${location.origin}`
+    body:`key=${SECRET_KEY}&action=cari&nomor=${val}`
   })
   .then(r=>r.json())
   .then(res=>{
     hideLoading();
-    if(!res.ok){ showStatus(res.msg); return;}
+    if(!res.ok){ alert(res.msg); return; }
 
     currentNomor=val;
     dataCard.style.display="block";
-    dNama.textContent=res.nama;
-    dNik.textContent=res.nik;
-    dKategori.textContent=res.kategori;
+    nama.textContent=res.nama;
+    nik.textContent=res.nik;
+    kategori.textContent=res.kategori;
+  })
+  .catch(()=>{
+    hideLoading();
+    alert("Server tidak merespons");
   });
 }
 
-async function openCamera(){
-  stream=await navigator.mediaDevices.getUserMedia({
-    video:{facingMode:"environment"}
+function ambilFoto(){
+  navigator.mediaDevices.getUserMedia({video:true})
+  .then(stream=>{
+    const video=document.createElement("video");
+    video.srcObject=stream;
+    video.play();
+
+    setTimeout(()=>{
+      const canvas=document.createElement("canvas");
+      canvas.width=video.videoWidth;
+      canvas.height=video.videoHeight;
+      canvas.getContext("2d").drawImage(video,0,0);
+
+      fotoBase64=canvas.toDataURL("image/jpeg",0.7);
+
+      preview.src=fotoBase64;
+      preview.style.display="block";
+      btnKirim.style.display="block";
+
+      stream.getTracks().forEach(t=>t.stop());
+    },1000);
   });
-  const video=document.createElement("video");
-  video.srcObject=stream;
-  video.play();
-
-  const canvas=document.createElement("canvas");
-
-  setTimeout(()=>{
-    canvas.width=video.videoWidth;
-    canvas.height=video.videoHeight;
-    canvas.getContext("2d").drawImage(video,0,0);
-
-    const maxWidth=1000;
-    let w=canvas.width, h=canvas.height;
-
-    if(w>maxWidth){
-      h = h * (maxWidth/w);
-      w = maxWidth;
-    }
-
-    const resize=document.createElement("canvas");
-    resize.width=w;
-    resize.height=h;
-    resize.getContext("2d").drawImage(canvas,0,0,w,h);
-
-    fotoBase64=resize.toDataURL("image/jpeg",0.7);
-
-    preview.src=fotoBase64;
-    preview.style.display="block";
-    sendBtn.style.display="block";
-
-    stream.getTracks().forEach(t=>t.stop());
-  },1000);
 }
 
 function kirim(){
   showLoading();
+
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:`key=${SECRET_KEY}&action=serah_terima&nomor=${currentNomor}&origin=${location.origin}&foto=${encodeURIComponent(fotoBase64.split(",")[1])}`
+    body:`key=${SECRET_KEY}&action=serah_terima&nomor=${currentNomor}&foto=${encodeURIComponent(fotoBase64.split(",")[1])}`
   })
   .then(r=>r.json())
   .then(res=>{
     hideLoading();
-    if(!res.ok){ showStatus(res.msg); return;}
-    showStatus("Serah Terima Berhasil","success");
+    if(!res.ok){ alert(res.msg); return; }
+    alert("Berhasil");
     dataCard.style.display="none";
+  })
+  .catch(()=>{
+    hideLoading();
+    alert("Server tidak merespons");
   });
-}
-</script>
-
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js");
 }
 </script>
 
