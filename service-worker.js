@@ -9,7 +9,7 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener("install", event => {
-  self.skipWaiting(); // 🔥 paksa versi baru aktif
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
@@ -25,7 +25,7 @@ self.addEventListener("activate", event => {
       )
     )
   );
-  self.clients.claim(); // 🔥 ambil alih semua tab
+  self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
