@@ -1,11 +1,11 @@
-const CACHE_NAME = "terima-klg-v2";
+const CACHE_NAME = "terima-klg-v3";
 
 const STATIC_ASSETS = [
-  "/serah-terima-klg/",
-  "/serah-terima-klg/index.html",
-  "/serah-terima-klg/manifest.json",
-  "/serah-terima-klg/icons/icon-192.png",
-  "/serah-terima-klg/icons/icon-512.png"
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png"
 ];
 
 self.addEventListener("install", event => {
@@ -29,10 +29,11 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  
   if (event.request.method !== "GET") return;
 
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(event.request)
+      .then(res => res)
+      .catch(() => caches.match(event.request))
   );
 });
