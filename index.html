@@ -81,11 +81,13 @@ button{
 }
 </style>
 </head>
+
 <body>
 
 <div id="globalLoading">Memproses...</div>
 
 <div class="container">
+  
   <div class="card" id="searchCard">
     <label>Nomor Layanan</label>
     <input id="nomor" inputmode="numeric"
@@ -93,7 +95,7 @@ button{
       oninput="this.value=this.value.replace(/[^0-9]/g,'')">
     <button class="primary" onclick="cari()">Cari Data</button>
   </div>
-
+  
   <div class="card" id="dataCard" style="display:none">
     <div><b>Nama:</b> <span id="dNama"></span></div>
     <div><b>NIK:</b> <span id="dNik"></span></div>
@@ -110,7 +112,7 @@ button{
 </div>
 
 <script>
-const API_URL="PASTE_URL_APPS_SCRIPT_KAMU";
+const API_URL="PASTE_URL_WEB_APP_KAMU";
 const SECRET_KEY="GANTI_SECRET_BARU";
 
 let currentNomor="", fotoBase64="", stream=null;
@@ -118,7 +120,7 @@ let currentNomor="", fotoBase64="", stream=null;
 function showLoading(){globalLoading.style.display="flex";}
 function hideLoading(){globalLoading.style.display="none";}
 
-function showStatus(msg,type){
+function showStatus(msg,type="error"){
   bigStatus.style.display="block";
   bigStatus.innerText=msg;
   bigStatus.style.background= type==="success"?"#dcfce7":"#fee2e2";
@@ -133,7 +135,7 @@ function cari(){
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:`key=${SECRET_KEY}&action=cari&nomor=${val}`
+    body:`key=${SECRET_KEY}&action=cari&nomor=${val}&origin=${location.origin}`
   })
   .then(r=>r.json())
   .then(res=>{
@@ -157,15 +159,20 @@ async function openCamera(){
   video.play();
 
   const canvas=document.createElement("canvas");
+
   setTimeout(()=>{
     canvas.width=video.videoWidth;
     canvas.height=video.videoHeight;
     canvas.getContext("2d").drawImage(video,0,0);
 
-    // RESIZE MAX 1000px
-    const max=1000;
+    const maxWidth=1000;
     let w=canvas.width, h=canvas.height;
-    if(w>max){ h*=max/w; w=max;}
+
+    if(w>maxWidth){
+      h = h * (maxWidth/w);
+      w = maxWidth;
+    }
+
     const resize=document.createElement("canvas");
     resize.width=w;
     resize.height=h;
@@ -186,7 +193,7 @@ function kirim(){
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:`key=${SECRET_KEY}&action=serah_terima&nomor=${currentNomor}&foto=${encodeURIComponent(fotoBase64.split(",")[1])}`
+    body:`key=${SECRET_KEY}&action=serah_terima&nomor=${currentNomor}&origin=${location.origin}&foto=${encodeURIComponent(fotoBase64.split(",")[1])}`
   })
   .then(r=>r.json())
   .then(res=>{
@@ -195,6 +202,12 @@ function kirim(){
     showStatus("Serah Terima Berhasil","success");
     dataCard.style.display="none";
   });
+}
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js");
 }
 </script>
 
