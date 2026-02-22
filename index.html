@@ -5,101 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Terima KLG</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1e3a8a">
-
 <style>
-:root{
-  --primary:#1e3a8a;
-  --success:#15803d;
-  --danger:#b91c1c;
-  --bg:#f4f6f8;
-  --card:#ffffff;
-  --border:#e2e8f0;
-  --label:#64748b;
-  --text:#0f172a;
+body{font-family:Arial;background:#f4f6f8;margin:0;padding:16px}
+.card{background:#fff;padding:16px;border-radius:12px;margin-bottom:16px}
+input,button{width:100%;padding:12px;margin-top:8px}
+button{cursor:pointer}
+#preview{width:100%;max-height:320px;display:none;margin-top:12px}
+#status{margin-top:12px;font-weight:bold}
+.loading{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  display:none;align-items:center;justify-content:center;
+  color:#fff;font-size:18px;font-weight:bold;
 }
-*{box-sizing:border-box}
-body{
-  margin:0;background:var(--bg);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  color:var(--text);
-}
-.container{max-width:480px;margin:0 auto;padding:16px}
-.card{
-  background:var(--card);
-  border-radius:16px;
-  padding:16px;
-  box-shadow:0 1px 4px rgba(0,0,0,.08);
-  margin-bottom:16px;
-}
-label{font-size:13px;color:var(--label)}
-input{
-  width:100%;padding:14px;margin-top:6px;
-  font-size:18px;border-radius:12px;
-  border:1px solid var(--border);
-  text-align:center;
-}
-button{
-  width:100%;padding:14px;font-size:16px;
-  border-radius:12px;border:none;margin-top:14px;
-}
-.primary{background:var(--primary);color:#fff}
-.secondary{background:#fff;border:1px solid var(--border)}
-.success{background:var(--success);color:#fff}
-
-.data-row{
-  display:grid;
-  grid-template-columns:110px 1fr;
-  gap:8px;padding:8px 0;
-  border-bottom:1px solid var(--border)
-}
-.data-row:last-child{border-bottom:none}
-.data-key{font-size:12px;color:var(--label)}
-.data-val{font-size:14px;font-weight:600}
-
-#preview{
-  width:100%;
-  max-height:320px;
-  object-fit:contain;
-  border-radius:12px;
-  margin-top:12px;
-  display:none;
-  background:#000
-}
-
-#bigStatus{
-  display:none;
-  padding:16px;
-  border-radius:12px;
-  font-weight:700;
-  text-align:center;
-  margin-top:12px;
-  transition:opacity .3s ease;
-}
-
-#globalLoading{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-  color:#fff;
-  font-size:18px;
-  font-weight:600;
-}
-
 .modal{
   position:fixed;inset:0;background:#000;
-  display:none;z-index:9999
+  display:none;z-index:9999;
 }
 .modal video{width:100%;height:100%;object-fit:cover}
 .modal-actions{
   position:absolute;bottom:0;left:0;right:0;
-  display:flex;gap:12px;padding:12px;
-  background:rgba(0,0,0,.7)
+  display:flex;gap:10px;padding:10px;
+  background:rgba(0,0,0,.7);
 }
 .modal-actions button{flex:1}
 </style>
@@ -107,108 +33,59 @@ button{
 
 <body>
 
-<div id="globalLoading">Memproses...</div>
+<div class="loading" id="loading">Memproses...</div>
 
-<div class="container">
-  
-  <div class="card" id="searchCard">
-    <label>Nomor Layanan</label>
-    <input id="nomor" inputmode="numeric"
-      placeholder="Masukkan nomor layanan"
-      oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-
-    <button class="primary" id="searchBtn" onclick="cari()">Cari Data</button>
-    
-    <button class="secondary" id="installBtn" style="display:none">
-      Pasang Aplikasi
-    </button>
-  </div>
-  
-  <div class="card" id="dataCard" style="display:none">
-    <div class="data-row"><div class="data-key">Nomor</div><div class="data-val" id="dNomor"></div></div>
-    <div class="data-row"><div class="data-key">Kategori</div><div class="data-val" id="dKategori"></div></div>
-    <div class="data-row"><div class="data-key">NIK</div><div class="data-val" id="dNik"></div></div>
-    <div class="data-row"><div class="data-key">Nama</div><div class="data-val" id="dNama"></div></div>
-    <div class="data-row"><div class="data-key">Kelurahan</div><div class="data-val" id="dKel"></div></div>
-    <div class="data-row"><div class="data-key">Kecamatan</div><div class="data-val" id="dKec"></div></div>
-    <div class="data-row"><div class="data-key">Kota</div><div class="data-val" id="dKota"></div></div>
-    <div class="data-row"><div class="data-key">Provinsi</div><div class="data-val" id="dProv"></div></div>
-
-    <button class="secondary" id="btnAmbilFoto" onclick="openCamera()">Ambil Foto Bukti</button>
-    <img id="preview">
-    <button id="sendBtn" class="success" onclick="kirim()" style="display:none">
-      Konfirmasi Serah Terima
-    </button>
-  </div>
-
-  <div id="bigStatus"></div>
+<div class="card" id="searchCard">
+  <label>Nomor Layanan</label>
+  <input id="nomor" inputmode="numeric">
+  <button onclick="cari()">Cari Data</button>
 </div>
+
+<div class="card" id="dataCard" style="display:none">
+  <div><b>Nomor:</b> <span id="dNomor"></span></div>
+  <div><b>Nama:</b> <span id="dNama"></span></div>
+  <div><b>NIK:</b> <span id="dNik"></span></div>
+  <div><b>Kategori:</b> <span id="dKategori"></span></div>
+  <div><b>Kelurahan:</b> <span id="dKel"></span></div>
+  <div><b>Kecamatan:</b> <span id="dKec"></span></div>
+  <div><b>Kota:</b> <span id="dKota"></span></div>
+  <div><b>Provinsi:</b> <span id="dProv"></span></div>
+
+  <button id="btnFoto" onclick="openCamera()">Ambil Foto Bukti</button>
+  <img id="preview">
+  <button id="btnKirim" style="display:none" onclick="kirim()">Konfirmasi Serah Terima</button>
+</div>
+
+<div id="status"></div>
 
 <div class="modal" id="cameraModal">
   <video id="video" autoplay playsinline></video>
   <div class="modal-actions">
-    <button class="secondary" onclick="closeCamera()">Batal</button>
-    <button class="primary" onclick="takePhoto()">Ambil Gambar</button>
+    <button onclick="closeCamera()">Batal</button>
+    <button onclick="takePhoto()">Ambil</button>
   </div>
 </div>
 
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbysoR1ni-48dc3M-HFfWDv0Ngp_RO9LBrPiAW6xfwPM66ED8XPZrXZwPCJTuIfSjuoK/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbx0Lunwp1mVcPlti8h3GoMi7sa33UOOm_ANjh8_6XRk_0t-Ja3uNRGo26g1Mg-V07Nm4g/exec";
 const SECRET_KEY="yhggt5540YhGGtxthpBGTSugiantech";
 
-let currentNomor="", fotoBase64="", stream=null, submitting=false;
-let statusTimeout;
+let currentNomor="";
+let fotoBase64="";
+let stream=null;
+let submitting=false;
 
-function showLoading(){globalLoading.style.display="flex";}
-function hideLoading(){globalLoading.style.display="none";}
-
-function showStatus(msg,type,duration=3000){
-  clearTimeout(statusTimeout);
-  bigStatus.style.display="block";
-  bigStatus.style.opacity="1";
-  bigStatus.innerText=msg;
-
-  if(type==="success"){
-    bigStatus.style.background="#dcfce7";
-    bigStatus.style.color="#166534";
-  }else{
-    bigStatus.style.background="#fee2e2";
-    bigStatus.style.color="#991b1b";
-  }
-
-  if(duration>0){
-    statusTimeout=setTimeout(()=>{
-      bigStatus.style.opacity="0";
-      setTimeout(()=>{bigStatus.style.display="none";},300);
-    },duration);
-  }
-}
-
-function resetUI(){
-  bigStatus.style.display="none";
-  dataCard.style.display="none";
-  preview.style.display="none";
-  sendBtn.style.display="none";
-  btnAmbilFoto.style.display="block";
-  searchCard.style.display="block";
-}
+function showLoading(){loading.style.display="flex";}
+function hideLoading(){loading.style.display="none";}
+function showStatus(msg){status.innerText=msg;}
 
 function cari(){
-  resetUI();
 
-  if(!navigator.onLine){
-    showStatus("Tidak ada koneksi","error",0);
-    return;
-  }
-
+  showStatus("");
   const val=nomor.value.trim();
-  if(!val){
-    showStatus("Nomor belum diisi","error");
-    return;
-  }
+  if(!val){showStatus("Nomor kosong");return;}
 
   showLoading();
-  searchBtn.disabled=true;
 
   fetch(API_URL,{
     method:"POST",
@@ -218,10 +95,9 @@ function cari(){
   .then(r=>r.json())
   .then(res=>{
     hideLoading();
-    searchBtn.disabled=false;
 
     if(!res.ok){
-      showStatus(res.msg,"error");
+      showStatus(res.msg);
       return;
     }
 
@@ -229,23 +105,23 @@ function cari(){
     dataCard.style.display="block";
 
     dNomor.textContent=res.nomor_layanan;
-    dKategori.textContent=res.kategori;
-    dNik.textContent=res.nik;
     dNama.textContent=res.nama;
+    dNik.textContent=res.nik;
+    dKategori.textContent=res.kategori;
     dKel.textContent=res.kelurahan;
     dKec.textContent=res.kecamatan;
     dKota.textContent=res.kota;
     dProv.textContent=res.provinsi;
-
-    dataCard.scrollIntoView({behavior:"smooth"});
+  })
+  .catch(()=>{
+    hideLoading();
+    showStatus("Server error");
   });
 }
 
 async function openCamera(){
   cameraModal.style.display="block";
-  stream=await navigator.mediaDevices.getUserMedia({
-    video:{facingMode:"environment",width:{ideal:1280},height:{ideal:720}}
-  });
+  stream=await navigator.mediaDevices.getUserMedia({video:true});
   video.srcObject=stream;
 }
 
@@ -261,74 +137,51 @@ function takePhoto(){
   c.getContext("2d").drawImage(video,0,0);
 
   fotoBase64=c.toDataURL("image/jpeg",0.6);
-
   preview.src=fotoBase64;
   preview.style.display="block";
 
   closeCamera();
 
-  // MODE KONFIRMASI
-  btnAmbilFoto.style.display="none";
+  btnFoto.style.display="none";
   searchCard.style.display="none";
-  sendBtn.style.display="block";
-
-  window.scrollTo({top:0,behavior:"smooth"});
+  btnKirim.style.display="block";
 }
 
 function kirim(){
-  if(submitting) return;
-  submitting=true;
 
+  if(submitting) return;
+  if(!fotoBase64){showStatus("Foto belum diambil");return;}
+
+  submitting=true;
   showLoading();
-  sendBtn.disabled=true;
 
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:`key=${SECRET_KEY}&action=serah_terima&nomor=${currentNomor}&foto=${fotoBase64.split(",")[1]}`
+    body:`key=${SECRET_KEY}&action=serah_terima&nomor=${currentNomor}&foto=${encodeURIComponent(fotoBase64.split(",")[1])}`
   })
   .then(r=>r.json())
   .then(res=>{
     hideLoading();
     submitting=false;
-    sendBtn.disabled=false;
 
     if(!res.ok){
-      showStatus(res.msg,"error");
+      showStatus(res.msg);
       return;
     }
 
-    showStatus("Serah Terima Berhasil","success");
+    showStatus("Serah Terima Berhasil");
 
     setTimeout(()=>{
-      nomor.value="";
-      resetUI();
-    },2000);
+      location.reload();
+    },1500);
+  })
+  .catch(()=>{
+    hideLoading();
+    submitting=false;
+    showStatus("Server error");
   });
 }
-</script>
-
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js");
-}
-</script>
-
-<script>
-let deferredPrompt;
-const installBtn=document.getElementById("installBtn");
-window.addEventListener("beforeinstallprompt",e=>{
-  e.preventDefault();
-  deferredPrompt=e;
-  installBtn.style.display="block";
-});
-installBtn.addEventListener("click",async()=>{
-  if(!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt=null;
-  installBtn.style.display="none";
-});
-window.addEventListener("appinstalled",()=>installBtn.style.display="none");
 </script>
 
 </body>
