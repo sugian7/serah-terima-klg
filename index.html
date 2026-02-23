@@ -192,7 +192,7 @@ function kirim(){
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:`key=${SECRET_KEY}&action=serah_terima&nomor=${currentNomor}&foto=${fotoBase64.split(",")[1]}`
+    body:`key=${SECRET_KEY}&action=serah_terima&nomor=${encodeURIComponent(currentNomor)}&foto=${encodeURIComponent(fotoBase64.split(",")[1])}`
   })
   .then(r=>r.json())
   .then(res=>{
